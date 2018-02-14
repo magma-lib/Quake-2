@@ -20,10 +20,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "vk_local.h"
 
 void R_Clear(void);
+
 void VK_InitDebugCallback(void);
 void VK_DestroyDebugCallback(void);
-
 qboolean VK_CreateRenderPass(void);
+void VK_DestroyRenderPass();
 qboolean VK_CreateFramebuffer(void);
 void VK_DestroyFramebuffer(void);
 
@@ -564,7 +565,7 @@ void R_Shutdown(void)
         vk_context.device = VK_NULL_HANDLE;
     }
 
-    VK_InitDebugCallback();
+    VK_DestroyDebugCallback();
 
     if (vk_context.instance != VK_NULL_HANDLE)
     {
