@@ -407,12 +407,15 @@ qboolean VKimp_InitSwapchain(void)
 void VKimp_BeginFrame(float camera_separation)
 {
     if (vkAcquireNextImageKHR(vk_context.device, vkw_state.swapchain, UINT64_MAX,
+        vk_context.present,
         VK_NULL_HANDLE,
-        vk_context.fence, 
         &vkw_state.image_index) != VK_SUCCESS)
     {
         ri.Con_Printf(PRINT_ALL, "VKimp_BeginFrame() - couldn't acquire next image\n");
     }
+
+    vkWaitForFences(vk_context.device, 1, &vk_context.fences[vkw_state.image_index], VK_TRUE, UINT64_MAX);
+    vkResetFences(vk_context.device, 1, &vk_context.fences[vkw_state.image_index]);
 }
 
 /*
@@ -424,26 +427,40 @@ void VKimp_BeginFrame(float camera_separation)
 */
 void VKimp_EndFrame(void)
 {
+    const VkPipelineStageFlags wait_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkSubmitInfo submit_info;
     VkPresentInfoKHR present_info;
 
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.pNext = NULL;
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = &vk_context.present; // Wait for present to complete
+    submit_info.pWaitDstStageMask = &wait_stage_mask;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &vk_context.cmdbuf[vkw_state.image_index];
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = &vk_context.render; // Signal on render complete
+    
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.pNext = NULL;
-    present_info.waitSemaphoreCount = 0;
-    present_info.pWaitSemaphores = NULL;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &vk_context.render; // Wait for render to complete
     present_info.swapchainCount = 1;
     present_info.pSwapchains = &vkw_state.swapchain;
     present_info.pImageIndices = &vkw_state.image_index;
     present_info.pResults = NULL;
-    
+
+    if (vkQueueSubmit(vk_context.queue, 1, &submit_info, vk_context.fences[vkw_state.image_index]) != VK_SUCCESS)
+    {
+        ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - failed to submit command buffer\n");
+    }
+
     if (vkQueuePresentKHR(vk_context.queue, &present_info) != VK_SUCCESS)
     {
         ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - swap chain present failed\n");
     }
 
     vkDeviceWaitIdle(vk_context.device);
-
-    vkWaitForFences(vk_context.device, 1, &vk_context.fence, VK_TRUE, UINT64_MAX);
-    vkResetFences(vk_context.device, 1, &vk_context.fence);
 }
 
 /*
