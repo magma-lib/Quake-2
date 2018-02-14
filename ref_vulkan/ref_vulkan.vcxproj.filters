@@ -91,5 +91,11 @@
     <ClCompile Include="vk_light.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vk_mesh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vk_rmisc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

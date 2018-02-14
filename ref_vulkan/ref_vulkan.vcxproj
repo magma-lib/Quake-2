@@ -291,8 +291,10 @@
     <ClCompile Include="vk_framebuffer.c" />
     <ClCompile Include="vk_image.c" />
     <ClCompile Include="vk_light.c" />
+    <ClCompile Include="vk_mesh.c" />
     <ClCompile Include="vk_model.c" />
     <ClCompile Include="vk_rmain.c" />
+    <ClCompile Include="vk_rmisc.c" />
     <ClCompile Include="vk_rsurf.c" />
     <ClCompile Include="vk_warp.c" />
   </ItemGroup>
