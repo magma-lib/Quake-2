@@ -924,7 +924,7 @@ image_t *VK_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 	if (i == numvktextures)
 	{
 		if (numvktextures == MAX_VKTEXTURES)
-			ri.Sys_Error (ERR_DROP, "MAX_GLTEXTURES");
+			ri.Sys_Error (ERR_DROP, "MAX_VKTEXTURES");
 		numvktextures++;
 	}
 	image = &vktextures[i];
