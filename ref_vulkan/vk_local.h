@@ -283,6 +283,14 @@ typedef struct
     VkSemaphore         present, render;
     VkFence             fence;
 
+    VkExtent2D          extent;
+    vkimage_t           front;
+    vkimage_t           back;
+    vkimage_t           depth_stencil;
+    VkRenderPass        renderpass;
+    VkFramebuffer       framebuffers[2];
+    VkImage             *swap_images;
+
     VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;
 
