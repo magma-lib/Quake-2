@@ -268,6 +268,13 @@ struct image_s *R_RegisterSkin(char *name);
 
 typedef struct
 {
+    VkImage         image;
+    VkImageView     view;
+    VkDeviceMemory  memory;
+} vkimage_t;
+
+typedef struct
+{
     VkInstance          instance;
     VkPhysicalDevice    phys_device;
     VkDevice            device;
