@@ -23,6 +23,10 @@ void R_Clear(void);
 void VK_InitDebugCallback(void);
 void VK_DestroyDebugCallback(void);
 
+qboolean VK_CreateRenderPass(void);
+qboolean VK_CreateFramebuffer(void);
+void VK_DestroyFramebuffer(void);
+
 viddef_t	vid;
 
 refimport_t	ri;
@@ -525,6 +529,9 @@ qboolean R_Init(void *hinstance, void *hWnd)
         return false;
     }
 
+    VK_CreateRenderPass();
+    VK_CreateFramebuffer();
+
     ri.Vid_MenuInit();
 
     Draw_InitLocal();
@@ -539,6 +546,9 @@ R_Shutdown
 */
 void R_Shutdown(void)
 {
+    VK_DestroyFramebuffer();
+    VK_DestroyRenderPass();
+
     if (vk_context.present != VK_NULL_HANDLE || 
         vk_context.render != VK_NULL_HANDLE)
     {

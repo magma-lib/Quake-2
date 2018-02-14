@@ -79,5 +79,8 @@
     <ClCompile Include="vk_debug.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vk_framebuffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
