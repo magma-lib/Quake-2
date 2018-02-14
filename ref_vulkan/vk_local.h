@@ -232,6 +232,9 @@ extern	unsigned	d_8to24table[256];
 
 extern	int		registration_sequence;
 
+void R_LightPoint(vec3_t p, vec3_t color);
+void R_PushDlights(void);
+
 //====================================================================
 
 extern	model_t	*r_worldmodel;
