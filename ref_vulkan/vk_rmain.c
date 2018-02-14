@@ -207,7 +207,48 @@ R_Clear
 */
 void R_Clear(void)
 {
+    int i;
 
+    for (i = 0; i < 2; ++i)
+    {
+        VkCommandBuffer cmdbuf = vk_context.cmdbuf[i];
+        VkCommandBufferBeginInfo begin_info;
+
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        begin_info.pNext = NULL;
+        begin_info.flags = 0;
+        begin_info.pInheritanceInfo = NULL;
+
+        vkResetCommandBuffer(cmdbuf, 0);
+        vkBeginCommandBuffer(cmdbuf, &begin_info);
+        {
+            VkRenderPassBeginInfo render_pass_begin;
+            VkClearValue clear_values[2];
+
+            clear_values[0].color.float32[0] = 0.35f;
+            clear_values[0].color.float32[1] = 0.53f;
+            clear_values[0].color.float32[2] = 0.7f;
+            clear_values[0].color.float32[3] = 1.0f;
+            clear_values[1].depthStencil.depth = 1.0f;
+            clear_values[1].depthStencil.stencil = 0;
+
+            render_pass_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            render_pass_begin.pNext = NULL;
+            render_pass_begin.renderPass = vk_context.renderpass;
+            render_pass_begin.framebuffer = vk_context.framebuffers[i];
+            render_pass_begin.renderArea.offset.x = 0;
+            render_pass_begin.renderArea.offset.y = 0;
+            render_pass_begin.renderArea.extent = vk_context.extent;
+            render_pass_begin.clearValueCount = 2;
+            render_pass_begin.pClearValues = clear_values;
+
+            vkCmdBeginRenderPass(cmdbuf, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
+            {
+            }
+            vkCmdEndRenderPass(cmdbuf);
+        }
+        vkEndCommandBuffer(cmdbuf);
+    }
 }
 
 void R_Flash(void)
@@ -624,6 +665,8 @@ void R_BeginFrame(float camera_separation)
     }
 
     VKimp_BeginFrame(camera_separation);
+
+    R_Clear();
 }
 
 /*
