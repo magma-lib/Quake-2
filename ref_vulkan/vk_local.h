@@ -283,6 +283,9 @@ typedef struct
     VkSemaphore         present, render;
     VkFence             fences[2];
 
+    VkCommandPool       cmdpool;
+    VkCommandBuffer     cmdbuf[2];
+
     VkExtent2D          extent;
     vkimage_t           front;
     vkimage_t           back;

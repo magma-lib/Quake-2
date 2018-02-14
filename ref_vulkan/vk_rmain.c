@@ -369,6 +369,8 @@ static void R_InitContextObjects()
 {
     VkSemaphoreCreateInfo semaphore_info;
     VkFenceCreateInfo fence_info;
+    VkCommandPoolCreateInfo cmdpool_info;
+    VkCommandBufferAllocateInfo cmdbuf_alloc_info;
 
     vkGetDeviceQueue(vk_context.device, 0, 0, &vk_context.queue);
     vkGetDeviceQueue(vk_context.device, 2, 0, &vk_context.transfer_queue);
@@ -387,6 +389,20 @@ static void R_InitContextObjects()
     vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[0]);
     vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[1]);
 
+    cmdpool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    cmdpool_info.pNext = NULL;
+    cmdpool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    cmdpool_info.queueFamilyIndex = 0;
+
+    vkCreateCommandPool(vk_context.device, &cmdpool_info, NULL, &vk_context.cmdpool);
+
+    cmdbuf_alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdbuf_alloc_info.pNext = NULL;
+    cmdbuf_alloc_info.commandPool = vk_context.cmdpool;
+    cmdbuf_alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdbuf_alloc_info.commandBufferCount = 2;
+
+    vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, vk_context.cmdbuf);
 }
 
 /*
