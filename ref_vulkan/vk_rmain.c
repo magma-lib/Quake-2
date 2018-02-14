@@ -36,10 +36,18 @@ vkcontext_t vk_context;
 vkconfig_t  vk_config;
 vkstate_t   vk_state;
 
+model_t		*r_worldmodel;
+
+float		vkdepthmin, vkdepthmax;
+
+vkconfig_t vk_config;
+vkstate_t  vk_state;
+
 image_t		*r_notexture;		// use for bad textures
 image_t		*r_particletexture;	// little dot for particles
 
 entity_t	*currententity;
+model_t		*currentmodel;
 
 cplane_t	frustum[4];
 

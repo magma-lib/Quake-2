@@ -108,6 +108,8 @@ typedef enum
     rserr_unknown
 } rserr_t;
 
+#include "vk_model.h"
+
 void VK_BeginRendering(int *x, int *y, int *width, int *height);
 void VK_EndRendering(void);
 
@@ -136,10 +138,14 @@ extern	int			numvktextures;
 extern	image_t		*r_notexture;
 extern	image_t		*r_particletexture;
 extern	entity_t	*currententity;
+extern	model_t		*currentmodel;
 extern	int			r_visframecount;
 extern	int			r_framecount;
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
+
+
+extern	int			vk_filter_min, vk_filter_max;
 
 
 //
@@ -213,6 +219,10 @@ extern	cvar_t	*vid_gamma;
 
 extern	cvar_t		*intensity;
 
+extern	int		vk_lightmap_format;
+extern	int		vk_alpha_format;
+extern	int		vk_tex_alpha_format;
+
 extern	int		c_visible_lightmaps;
 extern	int		c_visible_textures;
 
@@ -223,6 +233,8 @@ extern	unsigned	d_8to24table[256];
 extern	int		registration_sequence;
 
 //====================================================================
+
+extern	model_t	*r_worldmodel;
 
 extern	unsigned	d_8to24table[256];
 
@@ -244,6 +256,7 @@ void R_RenderDlights(void);
 void R_DrawAlphaSurfaces(void);
 void R_InitParticleTexture(void);
 void Draw_InitLocal(void);
+void VK_SubdivideSurface(msurface_t *fa);
 qboolean R_CullBox(vec3_t mins, vec3_t maxs);
 void R_RotateForEntity(entity_t *e);
 void R_MarkLeaves(void);
@@ -264,7 +277,25 @@ void	R_BeginFrame(float camera_separation);
 void	R_SwapBuffers(int);
 void	R_SetPalette(const unsigned char *palette);
 
+void VK_ResampleTexture(unsigned *in, int inwidth, int inheight, unsigned *out, int outwidth, int outheight);
+
 struct image_s *R_RegisterSkin(char *name);
+
+void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height);
+image_t *VK_LoadPic(char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+image_t	*VK_FindImage(char *name, imagetype_t type);
+void	VK_TextureMode(char *string);
+void	VK_ImageList_f(void);
+
+void	VK_SetTexturePalette(unsigned palette[256]);
+
+void	VK_InitImages(void);
+void	VK_ShutdownImages(void);
+
+void	VK_FreeUnusedImages(void);
+
+void VK_TextureAlphaMode(char *string);
+void VK_TextureSolidMode(char *string);
 
 typedef struct
 {
@@ -304,12 +335,24 @@ typedef struct
 
 typedef struct
 {
+    float inverse_intensity;
     qboolean fullscreen;
+
+    int     prev_mode;
+
+    unsigned char *d_16to8table;
+
+    int lightmap_textures;
+
+    int	currenttextures[2];
+    int currenttmu;
 
     float camera_separation;
     qboolean stereo_enabled;
 
-    int     prev_mode;
+    unsigned char originalRedGammaTable[256];
+    unsigned char originalGreenGammaTable[256];
+    unsigned char originalBlueGammaTable[256];
 } vkstate_t;
 
 extern vkcontext_t vk_context;
