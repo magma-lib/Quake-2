@@ -281,7 +281,7 @@ typedef struct
     VkQueue             queue, transfer_queue;
 
     VkSemaphore         present, render;
-    VkFence             fence;
+    VkFence             fences[2];
 
     VkExtent2D          extent;
     vkimage_t           front;

@@ -382,9 +382,11 @@ static void R_InitContextObjects()
 
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_info.pNext = NULL;
-    fence_info.flags = 0;
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT; // create with singled bit for first frame
 
-    vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fence);
+    vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[0]);
+    vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[1]);
+
 }
 
 /*
