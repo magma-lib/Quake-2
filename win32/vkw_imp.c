@@ -395,6 +395,9 @@ qboolean VKimp_InitSwapchain(void)
         return false;
     }
 
+    vk_context.extent = caps.currentExtent;
+    vk_context.swap_images = vkw_state.swap_images;
+
     return true;
 }
 
