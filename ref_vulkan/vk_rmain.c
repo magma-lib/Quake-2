@@ -602,6 +602,9 @@ qboolean R_Init(void *hinstance, void *hWnd)
 
     ri.Vid_MenuInit();
 
+    VK_InitImages();
+    Mod_Init();
+    R_InitParticleTexture();
     Draw_InitLocal();
 
     return true;
