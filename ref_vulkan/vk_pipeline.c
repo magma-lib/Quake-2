@@ -39,6 +39,9 @@ VkPipeline Vk_CreateDefaultPipeline(
     VkPipelineDynamicStateCreateInfo dynamic;
     VkDynamicState dynamic_states[2];
 
+    assert(vk_context.pipeline_layout);
+    assert(vk_context.renderpass);
+
     stages[0] = vert;
     stages[1] = frag;
 
