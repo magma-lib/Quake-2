@@ -225,6 +225,17 @@ qboolean VK_CreateFramebuffer()
 
 void VK_DestroyFramebuffer()
 {
+    int i;
+
+    for (i = 0; i < 2; ++i)
+    {
+        if (vk_context.framebuffers[i])
+        {
+            vkDestroyFramebuffer(vk_context.device, vk_context.framebuffers[i], NULL);
+            vk_context.framebuffers[i] = VK_NULL_HANDLE;
+        }
+    }
+
     if (vk_context.front.view || vk_context.back.view)
     {
         vkDestroyImageView(vk_context.device, vk_context.front.view, NULL);
