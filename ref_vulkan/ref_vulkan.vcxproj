@@ -286,6 +286,7 @@
     <ClCompile Include="..\game\q_shared.c" />
     <ClCompile Include="..\win32\q_shwin.c" />
     <ClCompile Include="..\win32\vkw_imp.c" />
+    <ClCompile Include="vk_buffer.c" />
     <ClCompile Include="vk_debug.c" />
     <ClCompile Include="vk_draw.c" />
     <ClCompile Include="vk_framebuffer.c" />

@@ -166,6 +166,14 @@ typedef struct mleaf_s
 
 //===================================================================
 
+typedef struct
+{
+    VkBuffer buffer;
+    VkDeviceMemory memory;
+    VkDeviceSize size;
+    VkBufferUsageFlags usage;
+} vkbuffer_t;
+
 //
 // Whole model
 //

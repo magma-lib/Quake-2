@@ -97,5 +97,8 @@
     <ClCompile Include="vk_rmisc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vk_buffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -365,6 +365,18 @@ extern vkstate_t   vk_state;
 /*
 ====================================================================
 
+VULKAN OBJECTS
+
+====================================================================
+*/
+
+qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
+qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
+void Vk_DestroyBuffer(vkbuffer_t *buffer);
+
+/*
+====================================================================
+
 IMPORTED FUNCTIONS
 
 ====================================================================
