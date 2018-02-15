@@ -423,48 +423,63 @@ R_Clear
 */
 void R_Clear(void)
 {
-    int i;
+    VkRenderPassBeginInfo render_pass_begin;
+    VkClearValue clear_values[2];
 
-    for (i = 0; i < 2; ++i)
-    {
-        VkCommandBuffer cmdbuf = vk_context.cmdbuf[i];
-        VkCommandBufferBeginInfo begin_info;
+    clear_values[0].color.float32[0] = 0.35f;
+    clear_values[0].color.float32[1] = 0.53f;
+    clear_values[0].color.float32[2] = 0.7f;
+    clear_values[0].color.float32[3] = 1.0f;
+    clear_values[1].depthStencil.depth = 1.0f;
+    clear_values[1].depthStencil.stencil = 0;
 
-        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        begin_info.pNext = NULL;
-        begin_info.flags = 0;
-        begin_info.pInheritanceInfo = NULL;
+    render_pass_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_begin.pNext = NULL;
+    render_pass_begin.renderPass = vk_context.renderpass;
+    render_pass_begin.framebuffer = vk_context.curr_framebuffer;
+    render_pass_begin.renderArea.offset.x = 0;
+    render_pass_begin.renderArea.offset.y = 0;
+    render_pass_begin.renderArea.extent = vk_context.extent;
+    render_pass_begin.clearValueCount = 2;
+    render_pass_begin.pClearValues = clear_values;
 
-        vkResetCommandBuffer(cmdbuf, 0);
-        vkBeginCommandBuffer(cmdbuf, &begin_info);
-        {
-            VkRenderPassBeginInfo render_pass_begin;
-            VkClearValue clear_values[2];
+    vkCmdBeginRenderPass(vk_context.cmdbuffer, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
+}
 
-            clear_values[0].color.float32[0] = 0.35f;
-            clear_values[0].color.float32[1] = 0.53f;
-            clear_values[0].color.float32[2] = 0.7f;
-            clear_values[0].color.float32[3] = 1.0f;
-            clear_values[1].depthStencil.depth = 1.0f;
-            clear_values[1].depthStencil.stencil = 0;
+/*
+=============
+R_SetViewport
+=============
+*/
+void R_SetViewport(void)
+{
+    VkViewport viewport;
+    VkRect2D scissor;
 
-            render_pass_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            render_pass_begin.pNext = NULL;
-            render_pass_begin.renderPass = vk_context.renderpass;
-            render_pass_begin.framebuffer = vk_context.framebuffers[i];
-            render_pass_begin.renderArea.offset.x = 0;
-            render_pass_begin.renderArea.offset.y = 0;
-            render_pass_begin.renderArea.extent = vk_context.extent;
-            render_pass_begin.clearValueCount = 2;
-            render_pass_begin.pClearValues = clear_values;
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = (float)vk_context.extent.width;
+    viewport.height = (float)vk_context.extent.height;
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
 
-            vkCmdBeginRenderPass(cmdbuf, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
-            {
-            }
-            vkCmdEndRenderPass(cmdbuf);
-        }
-        vkEndCommandBuffer(cmdbuf);
-    }
+    scissor.offset.x = 0;
+    scissor.offset.y = 0;
+    scissor.extent.width = vk_context.extent.width;
+    scissor.extent.height = vk_context.extent.height;
+
+    vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &viewport);
+    vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &scissor);
+}
+
+/*
+=============
+R_BindGraphicsPipeline
+=============
+*/
+void R_BindGraphicsPipeline(void)
+{
+    vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline);
 }
 
 void R_Flash(void)
