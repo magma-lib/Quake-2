@@ -1042,6 +1042,11 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mod->maxs[0] = 32;
 	mod->maxs[1] = 32;
 	mod->maxs[2] = 32;
+
+    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->vertex_buffer);
+    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->color_buffer);
+    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->texcoord_buffer);
+    Vk_CreateIndexBuffer(pheader->num_tris * 3, &mod->index_buffer);
 }
 
 /*
@@ -1201,6 +1206,11 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
+    Vk_DestroyBuffer(&mod->vertex_buffer);
+    Vk_DestroyBuffer(&mod->color_buffer);
+    Vk_DestroyBuffer(&mod->texcoord_buffer);
+    Vk_DestroyBuffer(&mod->index_buffer);
+
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));
 }
