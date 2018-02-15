@@ -886,9 +886,6 @@ qboolean R_Init(void *hinstance, void *hWnd)
         return false;
     }
 
-    // initialize common Vulkan objects
-    R_InitContextObjects();
-    
     // initialize OS-specific parts of Vulkan
     if (!VKimp_Init(hinstance, hWnd))
         return false;
@@ -900,8 +897,8 @@ qboolean R_Init(void *hinstance, void *hWnd)
         return false;
     }
 
-    VK_CreateRenderPass();
-    VK_CreateFramebuffer();
+    // initialize common Vulkan objects
+    R_InitContextObjects();
 
     ri.Vid_MenuInit();
 
