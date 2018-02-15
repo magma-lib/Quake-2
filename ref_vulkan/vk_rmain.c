@@ -480,6 +480,9 @@ R_BindGraphicsPipeline
 void R_BindGraphicsPipeline(void)
 {
     vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline);
+    vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 
+        0, 1, &vk_context.dset, 
+        0, NULL);
 }
 
 void R_Flash(void)
