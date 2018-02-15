@@ -518,6 +518,8 @@ void R_RenderView(refdef_t *fd)
     R_SetupFrame();
 
     R_SetFrustum();
+    R_SetViewport();
+    R_BindGraphicsPipeline();
 
     //R_SetupGL();
 
