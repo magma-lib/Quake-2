@@ -406,6 +406,8 @@ qboolean VKimp_InitSwapchain(void)
 */
 void VKimp_BeginFrame(float camera_separation)
 {
+    VkCommandBufferBeginInfo begin_info;
+
     if (vkAcquireNextImageKHR(vk_context.device, vkw_state.swapchain, UINT64_MAX,
         vk_context.present,
         VK_NULL_HANDLE,
@@ -416,6 +418,17 @@ void VKimp_BeginFrame(float camera_separation)
 
     vkWaitForFences(vk_context.device, 1, &vk_context.fences[vkw_state.image_index], VK_TRUE, UINT64_MAX);
     vkResetFences(vk_context.device, 1, &vk_context.fences[vkw_state.image_index]);
+
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.pNext = NULL;
+    begin_info.flags = 0;
+    begin_info.pInheritanceInfo = NULL;
+
+    vkResetCommandBuffer(vk_context.cmdbuffer, 0);
+    vkBeginCommandBuffer(vk_context.cmdbuffer, &begin_info);
+
+    // set current framebuffer
+    vk_context.curr_framebuffer = vk_context.framebuffers[vkw_state.image_index];
 }
 
 /*
@@ -431,13 +444,19 @@ void VKimp_EndFrame(void)
     VkSubmitInfo submit_info;
     VkPresentInfoKHR present_info;
 
+    vkCmdEndRenderPass(vk_context.cmdbuffer);
+    if (vkEndCommandBuffer(vk_context.cmdbuffer) != VK_SUCCESS)
+    {
+        ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - couldn't end command buffer\n");
+    }
+
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.pNext = NULL;
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = &vk_context.present; // Wait for present to complete
     submit_info.pWaitDstStageMask = &wait_stage_mask;
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &vk_context.cmdbuf[vkw_state.image_index];
+    submit_info.pCommandBuffers = &vk_context.cmdbuffer;
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = &vk_context.render; // Signal on render complete
     
