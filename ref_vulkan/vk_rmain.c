@@ -762,11 +762,13 @@ R_Init
 */
 qboolean R_Init(void *hinstance, void *hWnd)
 {
-    const char *layers[] = {
 #ifdef _DEBUG
+    const char *layers[] = {
         "VK_LAYER_LUNARG_standard_validation"
-#endif
     };
+#else
+    const char *layers = NULL;
+#endif
     const char *instance_extensions[] = {
         VK_KHR_SURFACE_EXTENSION_NAME,
 #ifdef _WIN32
@@ -808,7 +810,7 @@ qboolean R_Init(void *hinstance, void *hWnd)
     instance_info.pNext = NULL;
     instance_info.flags = 0;
     instance_info.pApplicationInfo = &app_info;
-    instance_info.enabledLayerCount = sizeof(layers) / sizeof(layers[0]);
+    instance_info.enabledLayerCount = layers ? sizeof(layers) / sizeof(layers[0]) : 0;
     instance_info.ppEnabledLayerNames = layers;
     instance_info.enabledExtensionCount = sizeof(instance_extensions) / sizeof(instance_extensions[0]);
     instance_info.ppEnabledExtensionNames = instance_extensions;
