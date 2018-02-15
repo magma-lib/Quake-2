@@ -1043,10 +1043,10 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mod->maxs[1] = 32;
 	mod->maxs[2] = 32;
 
-    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->vertex_buffer);
-    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->color_buffer);
-    Vk_CreateVertexBuffer(pheader->num_xyz, &mod->texcoord_buffer);
-    Vk_CreateIndexBuffer(pheader->num_tris * 3, &mod->index_buffer);
+    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(vec3_t), &mod->vertex_buffer);
+    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(vec3_t), &mod->color_buffer);
+    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(float) * 2, &mod->texcoord_buffer);
+    Vk_CreateIndexBuffer(pheader->num_tris * sizeof(short) * 3, &mod->index_buffer);
 }
 
 /*
