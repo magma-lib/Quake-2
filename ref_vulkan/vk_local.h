@@ -379,6 +379,7 @@ void VK_DestroyRenderPass();
 qboolean VK_CreateFramebuffer(void);
 void VK_DestroyFramebuffer(void);
 
+qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean vertex, VkPipelineShaderStageCreateInfo *shader);
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 void Vk_DestroyBuffer(vkbuffer_t *buffer);
