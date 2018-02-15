@@ -76,6 +76,31 @@ void Vk_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 }
 
 /*
+=================
+Vk_AliasBindBuffers
+
+bind mesh vertex, color and texcoord buffers
+bind mesh index buffer
+=================
+*/
+void Vk_AliasBindBuffers(model_t *mod)
+{
+    VkBuffer buffers[3];
+    VkDeviceSize offsets[3];
+
+    buffers[0] = mod->vertex_buffer.buffer;
+    buffers[1] = mod->color_buffer.buffer;
+    buffers[2] = mod->texcoord_buffer.buffer;
+
+    offsets[0] = 0;
+    offsets[1] = 0;
+    offsets[2] = 0;
+
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 3, buffers, offsets);
+    vkCmdBindIndexBuffer(vk_context.cmdbuffer, mod->index_buffer.buffer, offsets[0], VK_INDEX_TYPE_UINT16);
+}
+
+/*
 =============
 Vk_DrawAliasFrameLerp
 
@@ -224,7 +249,7 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                             *indices++ = (unsigned short)order[2];
                             order += 3;
                         }
-                        //vkCmdDrawIndexed(vk_context.cmdbuf[0], count, 1, first_index, 0, 0);
+                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
                         first_index += count;
                     }
                 }
@@ -675,6 +700,7 @@ void R_DrawAliasModel(entity_t *e)
     if (!r_lerpmodels->value)
         currententity->backlerp = 0;
 
+    Vk_AliasBindBuffers(currentmodel);
     Vk_DrawAliasFrameLerp(paliashdr, currententity->backlerp, currentmodel);
 
     if ((currententity->flags & RF_WEAPONMODEL) && (r_lefthand->value == 1.0F))
