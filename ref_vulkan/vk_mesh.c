@@ -36,9 +36,6 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 typedef float vec4_t[4];
 
-static	vec4_t	s_lerped[MAX_VERTS];
-//static	vec3_t	lerped[MAX_VERTS];
-
 vec3_t	shadevector;
 float	shadelight[3];
 
@@ -50,7 +47,7 @@ float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
 
 float	*shadedots = r_avertexnormal_dots[0];
 
-void VK_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
+void Vk_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
 {
 	int i;
 
@@ -80,76 +77,167 @@ void VK_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 
 /*
 =============
-GL_DrawAliasFrameLerp
+Vk_DrawAliasFrameLerp
 
 interpolates between two frames and origins
 FIXME: batch lerp all vertexes
 =============
 */
-void VK_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
+void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
 {
-	float 	l;
-	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov, *verts;
-	int		*order;
-	int		count;
-	float	frontlerp;
-	float	alpha;
-	vec3_t	move, delta, vectors[3];
-	vec3_t	frontv, backv;
-	int		i;
-	int		index_xyz;
-	float	*lerp;
+    float 	l;
+    daliasframe_t	*frame, *oldframe;
+    dtrivertx_t	*v, *ov, *verts;
+    int		*order;
+    int		count;
+    float	frontlerp;
+    float	alpha;
+    vec3_t	move, delta, vectors[3];
+    vec3_t	frontv, backv;
+    int		i;
+    int		index_xyz;
+    void    *lerp;
+    float   *texcoords;
+    unsigned short *indices;
 
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
-		+ currententity->frame * paliashdr->framesize);
-	verts = v = frame->verts;
+    frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+        + currententity->frame * paliashdr->framesize);
+    verts = v = frame->verts;
 
-	oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
-		+ currententity->oldframe * paliashdr->framesize);
-	ov = oldframe->verts;
+    oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+        + currententity->oldframe * paliashdr->framesize);
+    ov = oldframe->verts;
 
-	order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+    order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
 
-//	glTranslatef (frame->translate[0], frame->translate[1], frame->translate[2]);
-//	glScalef (frame->scale[0], frame->scale[1], frame->scale[2]);
+    //	glTranslatef (frame->translate[0], frame->translate[1], frame->translate[2]);
+    //	glScalef (frame->scale[0], frame->scale[1], frame->scale[2]);
 
-	if (currententity->flags & RF_TRANSLUCENT)
-		alpha = currententity->alpha;
-	else
-		alpha = 1.0;
+    if (currententity->flags & RF_TRANSLUCENT)
+        alpha = currententity->alpha;
+    else
+        alpha = 1.0;
 
-	// PMM - added double shell
-    // TODO: disable texturing
+    // PMM - added double shell
+    if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+        ;// qglDisable(GL_TEXTURE_2D);
 
-	frontlerp = 1.0 - backlerp;
+    frontlerp = 1.0 - backlerp;
 
-	// move should be the delta back to the previous frame * backlerp
-	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+    // move should be the delta back to the previous frame * backlerp
+    VectorSubtract(currententity->oldorigin, currententity->origin, delta);
+    AngleVectors(currententity->angles, vectors[0], vectors[1], vectors[2]);
 
-	move[0] = DotProduct (delta, vectors[0]);	// forward
-	move[1] = -DotProduct (delta, vectors[1]);	// left
-	move[2] = DotProduct (delta, vectors[2]);	// up
+    move[0] = DotProduct(delta, vectors[0]);	// forward
+    move[1] = -DotProduct(delta, vectors[1]);	// left
+    move[2] = DotProduct(delta, vectors[2]);	// up
 
-	VectorAdd (move, oldframe->translate, move);
+    VectorAdd(move, oldframe->translate, move);
 
-	for (i=0 ; i<3 ; i++)
-	{
-		move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
-	}
+    for (i = 0; i<3; i++)
+    {
+        move[i] = backlerp * move[i] + frontlerp * frame->translate[i];
+    }
 
-	for (i=0 ; i<3 ; i++)
-	{
-		frontv[i] = frontlerp*frame->scale[i];
-		backv[i] = backlerp*oldframe->scale[i];
-	}
+    for (i = 0; i<3; i++)
+    {
+        frontv[i] = frontlerp * frame->scale[i];
+        backv[i] = backlerp * oldframe->scale[i];
+    }
 
-	lerp = s_lerped[0];
+    if (vkMapMemory(vk_context.device, mod->vertex_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&lerp) == VK_SUCCESS)
+    {
+        Vk_LerpVerts(paliashdr->num_xyz, v, ov, verts, (float *)lerp, move, frontv, backv);
+        vkUnmapMemory(vk_context.device, mod->vertex_buffer.memory);
+    }
 
-	VK_LerpVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv );
+    if (true)
+    {
+        if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+        {
+            //qglColor4f(shadelight[0], shadelight[1], shadelight[2], alpha);
+        }
+        else
+        {
+            float *colors;
 
-    // TODO: Vulkan render
+            //
+            // pre light everything
+            //
+            if (vkMapMemory(vk_context.device, mod->color_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&colors) == VK_SUCCESS)
+            {
+                for (i = 0; i < paliashdr->num_xyz; i++)
+                {
+                    float l = shadedots[verts[i].lightnormalindex];
+
+                    colors[i * 3 + 0] = l * shadelight[0];
+                    colors[i * 3 + 1] = l * shadelight[1];
+                    colors[i * 3 + 2] = l * shadelight[2];
+                }
+                vkUnmapMemory(vk_context.device, mod->color_buffer.memory);
+            }
+        }
+
+        if (vkMapMemory(vk_context.device, mod->texcoord_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&texcoords) == VK_SUCCESS)
+        {
+            if (vkMapMemory(vk_context.device, mod->index_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&indices) == VK_SUCCESS)
+            {
+                uint32_t first_index;
+
+                first_index = 0;
+                while (1)
+                {
+                    VkPrimitiveTopology topology;
+
+                    // get the vertex count and primitive type
+                    count = *order++;
+                    if (!count)
+                        break;		// done
+                    if (count < 0)
+                    {
+                        count = -count;
+                        topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+                    }
+                    else
+                    {
+                        topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+                    }
+
+                    // PMM - added double damage shell
+                    if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+                    {
+                        do
+                        {
+                            index_xyz = order[2];
+                            order += 3;
+
+                            //qglVertex3fv(s_lerped[index_xyz]);
+
+                        } while (--count);
+                    }
+                    else
+                    {
+                        for (i = 0; i < count; ++i)
+                        {
+                            *texcoords++ = ((float *)order)[0];
+                            *texcoords++ = ((float *)order)[1];
+                            *indices++ = (unsigned short)order[2];
+                            order += 3;
+                        }
+                        //vkCmdDrawIndexed(vk_context.cmdbuf[0], count, 1, first_index, 0, 0);
+                        first_index += count;
+                    }
+                }
+            }
+            vkUnmapMemory(vk_context.device, mod->index_buffer.memory);
+        }
+        vkUnmapMemory(vk_context.device, mod->texcoord_buffer.memory);
+    }
+   
+    //	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE ) )
+    // PMM - added double damage shell
+    if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+        ;// qglEnable(GL_TEXTURE_2D);
 }
 
 
@@ -336,222 +424,277 @@ R_DrawAliasModel
 
 =================
 */
-void R_DrawAliasModel (entity_t *e)
+void R_DrawAliasModel(entity_t *e)
 {
-	int			i;
-	dmdl_t		*paliashdr;
-	float		an;
-	vec3_t		bbox[8];
-	image_t		*skin;
+    int			i;
+    dmdl_t		*paliashdr;
+    float		an;
+    vec3_t		bbox[8];
+    image_t		*skin;
 
-	if ( !( e->flags & RF_WEAPONMODEL ) )
-	{
-		if ( R_CullAliasModel( bbox, e ) )
-			return;
-	}
+    if (!(e->flags & RF_WEAPONMODEL))
+    {
+        if (R_CullAliasModel(bbox, e))
+            return;
+    }
 
-	if ( e->flags & RF_WEAPONMODEL )
-	{
-		if ( r_lefthand->value == 2 )
-			return;
-	}
+    if (e->flags & RF_WEAPONMODEL)
+    {
+        if (r_lefthand->value == 2)
+            return;
+    }
 
-	paliashdr = (dmdl_t *)currentmodel->extradata;
+    paliashdr = (dmdl_t *)currentmodel->extradata;
 
-	//
-	// get lighting information
-	//
-	// PMM - rewrote, reordered to handle new shells & mixing
-	//
-	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE ) )
-	{
-		// PMM -special case for godmode
-		if ( (currententity->flags & RF_SHELL_RED) &&
-			(currententity->flags & RF_SHELL_BLUE) &&
-			(currententity->flags & RF_SHELL_GREEN) )
-		{
-			for (i=0 ; i<3 ; i++)
-				shadelight[i] = 1.0;
-		}
-		else if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE ) )
-		{
-			VectorClear (shadelight);
+    //
+    // get lighting information
+    //
+    // PMM - rewrote, reordered to handle new shells & mixing
+    //
+    if (currententity->flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE))
+    {
+        // PMM -special case for godmode
+        if ((currententity->flags & RF_SHELL_RED) &&
+            (currententity->flags & RF_SHELL_BLUE) &&
+            (currententity->flags & RF_SHELL_GREEN))
+        {
+            for (i = 0; i<3; i++)
+                shadelight[i] = 1.0;
+        }
+        else if (currententity->flags & (RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE))
+        {
+            VectorClear(shadelight);
 
-			if ( currententity->flags & RF_SHELL_RED )
-			{
-				shadelight[0] = 1.0;
-				if (currententity->flags & (RF_SHELL_BLUE|RF_SHELL_DOUBLE) )
-					shadelight[2] = 1.0;
-			}
-			else if ( currententity->flags & RF_SHELL_BLUE )
-			{
-				if ( currententity->flags & RF_SHELL_DOUBLE )
-				{
-					shadelight[1] = 1.0;
-					shadelight[2] = 1.0;
-				}
-				else
-				{
-					shadelight[2] = 1.0;
-				}
-			}
-			else if ( currententity->flags & RF_SHELL_DOUBLE )
-			{
-				shadelight[0] = 0.9;
-				shadelight[1] = 0.7;
-			}
-		}
-		else if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN ) )
-		{
-			VectorClear (shadelight);
-			// PMM - new colors
-			if ( currententity->flags & RF_SHELL_HALF_DAM )
-			{
-				shadelight[0] = 0.56;
-				shadelight[1] = 0.59;
-				shadelight[2] = 0.45;
-			}
-			if ( currententity->flags & RF_SHELL_GREEN )
-			{
-				shadelight[1] = 1.0;
-			}
-		}
-	}
-			//PMM - ok, now flatten these down to range from 0 to 1.0.
-	//		max_shell_val = max(shadelight[0], max(shadelight[1], shadelight[2]));
-	//		if (max_shell_val > 0)
-	//		{
-	//			for (i=0; i<3; i++)
-	//			{
-	//				shadelight[i] = shadelight[i] / max_shell_val;
-	//			}
-	//		}
-	// pmm
-	else if ( currententity->flags & RF_FULLBRIGHT )
-	{
-		for (i=0 ; i<3 ; i++)
-			shadelight[i] = 1.0;
-	}
-	else
-	{
-		R_LightPoint (currententity->origin, shadelight);
+            if (currententity->flags & RF_SHELL_RED)
+            {
+                shadelight[0] = 1.0;
+                if (currententity->flags & (RF_SHELL_BLUE | RF_SHELL_DOUBLE))
+                    shadelight[2] = 1.0;
+            }
+            else if (currententity->flags & RF_SHELL_BLUE)
+            {
+                if (currententity->flags & RF_SHELL_DOUBLE)
+                {
+                    shadelight[1] = 1.0;
+                    shadelight[2] = 1.0;
+                }
+                else
+                {
+                    shadelight[2] = 1.0;
+                }
+            }
+            else if (currententity->flags & RF_SHELL_DOUBLE)
+            {
+                shadelight[0] = 0.9;
+                shadelight[1] = 0.7;
+            }
+        }
+        else if (currententity->flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN))
+        {
+            VectorClear(shadelight);
+            // PMM - new colors
+            if (currententity->flags & RF_SHELL_HALF_DAM)
+            {
+                shadelight[0] = 0.56;
+                shadelight[1] = 0.59;
+                shadelight[2] = 0.45;
+            }
+            if (currententity->flags & RF_SHELL_GREEN)
+            {
+                shadelight[1] = 1.0;
+            }
+        }
+    }
+    //PMM - ok, now flatten these down to range from 0 to 1.0.
+    //		max_shell_val = max(shadelight[0], max(shadelight[1], shadelight[2]));
+    //		if (max_shell_val > 0)
+    //		{
+    //			for (i=0; i<3; i++)
+    //			{
+    //				shadelight[i] = shadelight[i] / max_shell_val;
+    //			}
+    //		}
+    // pmm
+    else if (currententity->flags & RF_FULLBRIGHT)
+    {
+        for (i = 0; i<3; i++)
+            shadelight[i] = 1.0;
+    }
+    else
+    {
+        R_LightPoint(currententity->origin, shadelight);
 
-		// player lighting hack for communication back to server
-		// big hack!
-		if ( currententity->flags & RF_WEAPONMODEL )
-		{
-			// pick the greatest component, which should be the same
-			// as the mono value returned by software
-			if (shadelight[0] > shadelight[1])
-			{
-				if (shadelight[0] > shadelight[2])
-					r_lightlevel->value = 150*shadelight[0];
-				else
-					r_lightlevel->value = 150*shadelight[2];
-			}
-			else
-			{
-				if (shadelight[1] > shadelight[2])
-					r_lightlevel->value = 150*shadelight[1];
-				else
-					r_lightlevel->value = 150*shadelight[2];
-			}
+        // player lighting hack for communication back to server
+        // big hack!
+        if (currententity->flags & RF_WEAPONMODEL)
+        {
+            // pick the greatest component, which should be the same
+            // as the mono value returned by software
+            if (shadelight[0] > shadelight[1])
+            {
+                if (shadelight[0] > shadelight[2])
+                    r_lightlevel->value = 150 * shadelight[0];
+                else
+                    r_lightlevel->value = 150 * shadelight[2];
+            }
+            else
+            {
+                if (shadelight[1] > shadelight[2])
+                    r_lightlevel->value = 150 * shadelight[1];
+                else
+                    r_lightlevel->value = 150 * shadelight[2];
+            }
 
-		}
-		
-		if ( vk_monolightmap->string[0] != '0' )
-		{
-			float s = shadelight[0];
+        }
 
-			if ( s < shadelight[1] )
-				s = shadelight[1];
-			if ( s < shadelight[2] )
-				s = shadelight[2];
+        if (vk_monolightmap->string[0] != '0')
+        {
+            float s = shadelight[0];
 
-			shadelight[0] = s;
-			shadelight[1] = s;
-			shadelight[2] = s;
-		}
-	}
+            if (s < shadelight[1])
+                s = shadelight[1];
+            if (s < shadelight[2])
+                s = shadelight[2];
 
-	if ( currententity->flags & RF_MINLIGHT )
-	{
-		for (i=0 ; i<3 ; i++)
-			if (shadelight[i] > 0.1)
-				break;
-		if (i == 3)
-		{
-			shadelight[0] = 0.1;
-			shadelight[1] = 0.1;
-			shadelight[2] = 0.1;
-		}
-	}
+            shadelight[0] = s;
+            shadelight[1] = s;
+            shadelight[2] = s;
+        }
+    }
 
-	if ( currententity->flags & RF_GLOW )
-	{	// bonus items will pulse with time
-		float	scale;
-		float	min;
+    if (currententity->flags & RF_MINLIGHT)
+    {
+        for (i = 0; i<3; i++)
+            if (shadelight[i] > 0.1)
+                break;
+        if (i == 3)
+        {
+            shadelight[0] = 0.1;
+            shadelight[1] = 0.1;
+            shadelight[2] = 0.1;
+        }
+    }
 
-		scale = 0.1 * sin(r_newrefdef.time*7);
-		for (i=0 ; i<3 ; i++)
-		{
-			min = shadelight[i] * 0.8;
-			shadelight[i] += scale;
-			if (shadelight[i] < min)
-				shadelight[i] = min;
-		}
-	}
+    if (currententity->flags & RF_GLOW)
+    {	// bonus items will pulse with time
+        float	scale;
+        float	min;
 
-// =================
-// PGM	ir goggles color override
-	if ( r_newrefdef.rdflags & RDF_IRGOGGLES && currententity->flags & RF_IR_VISIBLE)
-	{
-		shadelight[0] = 1.0;
-		shadelight[1] = 0.0;
-		shadelight[2] = 0.0;
-	}
-// PGM	
-// =================
+        scale = 0.1 * sin(r_newrefdef.time * 7);
+        for (i = 0; i<3; i++)
+        {
+            min = shadelight[i] * 0.8;
+            shadelight[i] += scale;
+            if (shadelight[i] < min)
+                shadelight[i] = min;
+        }
+    }
 
-	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-	
-	an = currententity->angles[1]/180*M_PI;
-	shadevector[0] = cos(-an);
-	shadevector[1] = sin(-an);
-	shadevector[2] = 1;
-	VectorNormalize (shadevector);
+    // =================
+    // PGM	ir goggles color override
+    if (r_newrefdef.rdflags & RDF_IRGOGGLES && currententity->flags & RF_IR_VISIBLE)
+    {
+        shadelight[0] = 1.0;
+        shadelight[1] = 0.0;
+        shadelight[2] = 0.0;
+    }
+    // PGM	
+    // =================
 
-	//
-	// locate the proper data
-	//
+    shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
-	c_alias_polys += paliashdr->num_tris;
+    an = currententity->angles[1] / 180 * M_PI;
+    shadevector[0] = cos(-an);
+    shadevector[1] = sin(-an);
+    shadevector[2] = 1;
+    VectorNormalize(shadevector);
 
-	//
-	// draw all the triangles
-	//
-    // TODO: Vulkan render
+    //
+    // locate the proper data
+    //
 
-	// select skin
-	if (currententity->skin)
-		skin = currententity->skin;	// custom player skin
-	else
-	{
-		if (currententity->skinnum >= MAX_MD2SKINS)
-			skin = currentmodel->skins[0];
-		else
-		{
-			skin = currentmodel->skins[currententity->skinnum];
-			if (!skin)
-				skin = currentmodel->skins[0];
-		}
-	}
-	if (!skin)
-		skin = r_notexture;	// fallback...
-	//VK_Bind(skin->texnum);
+    c_alias_polys += paliashdr->num_tris;
 
-	// draw it
-    // TODO: Vulkan render
+    //
+    // draw all the triangles
+    //
+    if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
+        ;//TODO
+
+    if ((currententity->flags & RF_WEAPONMODEL) && (r_lefthand->value == 1.0F))
+    {
+        // TODO:
+    }
+
+    e->angles[PITCH] = -e->angles[PITCH];	// sigh.
+    R_RotateForEntity(e);
+    e->angles[PITCH] = -e->angles[PITCH];	// sigh.
+
+                                            // select skin
+    if (currententity->skin)
+        skin = currententity->skin;	// custom player skin
+    else
+    {
+        if (currententity->skinnum >= MAX_MD2SKINS)
+            skin = currentmodel->skins[0];
+        else
+        {
+            skin = currentmodel->skins[currententity->skinnum];
+            if (!skin)
+                skin = currentmodel->skins[0];
+        }
+    }
+    if (!skin)
+        skin = r_notexture;	// fallback...
+    //GL_Bind(skin->texnum);
+
+    // draw it
+
+    if (currententity->flags & RF_TRANSLUCENT)
+    {
+    }
+
+    if ((currententity->frame >= paliashdr->num_frames)
+        || (currententity->frame < 0))
+    {
+        ri.Con_Printf(PRINT_ALL, "R_DrawAliasModel %s: no such frame %d\n",
+            currentmodel->name, currententity->frame);
+        currententity->frame = 0;
+        currententity->oldframe = 0;
+    }
+
+    if ((currententity->oldframe >= paliashdr->num_frames)
+        || (currententity->oldframe < 0))
+    {
+        ri.Con_Printf(PRINT_ALL, "R_DrawAliasModel %s: no such oldframe %d\n",
+            currentmodel->name, currententity->oldframe);
+        currententity->frame = 0;
+        currententity->oldframe = 0;
+    }
+
+    if (!r_lerpmodels->value)
+        currententity->backlerp = 0;
+
+    Vk_DrawAliasFrameLerp(paliashdr, currententity->backlerp, currentmodel);
+
+    if ((currententity->flags & RF_WEAPONMODEL) && (r_lefthand->value == 1.0F))
+    {
+        // TODO:
+    }
+
+    if (currententity->flags & RF_TRANSLUCENT)
+    {
+        // TODO:
+    }
+
+    if (currententity->flags & RF_DEPTHHACK)
+        ; // TODO
+
+#if 1
+    if (vk_shadows->value && !(currententity->flags & (RF_TRANSLUCENT | RF_WEAPONMODEL)))
+    {
+        // TODO:
+    }
+#endif
 }
-
 
