@@ -100,5 +100,11 @@
     <ClCompile Include="vk_buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vk_pipeline.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vk_shader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
