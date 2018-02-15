@@ -21,13 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void R_Clear(void);
 
-void VK_InitDebugCallback(void);
-void VK_DestroyDebugCallback(void);
-qboolean VK_CreateRenderPass(void);
-void VK_DestroyRenderPass();
-qboolean VK_CreateFramebuffer(void);
-void VK_DestroyFramebuffer(void);
-
 viddef_t	vid;
 
 refimport_t	ri;

@@ -370,6 +370,13 @@ VULKAN OBJECTS
 ====================================================================
 */
 
+void VK_InitDebugCallback(void);
+void VK_DestroyDebugCallback(void);
+qboolean VK_CreateRenderPass(void);
+void VK_DestroyRenderPass();
+qboolean VK_CreateFramebuffer(void);
+void VK_DestroyFramebuffer(void);
+
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 void Vk_DestroyBuffer(vkbuffer_t *buffer);
