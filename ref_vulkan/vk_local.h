@@ -332,6 +332,13 @@ typedef struct
     VkFramebuffer       curr_framebuffer;
     VkImage             *swap_images;
 
+    VkDescriptorPool    dpool;
+    VkDescriptorSetLayout   dset_layout;
+    VkDescriptorSet     dset;
+
+    vkbuffer_t          per_frame;
+    vkbuffer_t          per_object;
+
     VkPipelineLayout    pipeline_layout;
     VkPipeline          pipeline;
 
@@ -386,6 +393,7 @@ void VK_DestroyFramebuffer(void);
 
 qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean vertex, VkPipelineShaderStageCreateInfo *shader);
 void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader);
+qboolean Vk_DSetSetupLayout();
 VkPipeline Vk_CreateDefaultPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag);
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
