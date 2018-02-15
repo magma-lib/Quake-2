@@ -30,7 +30,7 @@ qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean ve
     length = ri.FS_LoadFile(filename, (void **)&buffer);
     if (!buffer)
     {
-        ri.Con_Printf(PRINT_DEVELOPER, "Couldn't load file %s\n", filename);
+        ri.Con_Printf(PRINT_ALL, "Couldn't load file %s\n", filename);
         return false;
     }
 
@@ -42,7 +42,7 @@ qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean ve
     
     if (vkCreateShaderModule(vk_context.device, &module_info, NULL, &module) != VK_SUCCESS)
     {
-        ri.Con_Printf(PRINT_DEVELOPER, "Couldn't create shader module %s\n", filename);
+        ri.Con_Printf(PRINT_ALL, "Couldn't create shader module %s\n", filename);
         return false;
     }
 
