@@ -57,3 +57,12 @@ qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean ve
     ri.FS_FreeFile(buffer);
     return true;
 }
+
+void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader)
+{
+    if (shader->module != VK_NULL_HANDLE)
+    {
+        vkDestroyShaderModule(vk_context.device, shader->module, NULL);
+        shader->module = VK_NULL_HANDLE;
+    }
+}
