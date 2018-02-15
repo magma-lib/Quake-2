@@ -68,6 +68,11 @@ qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer)
     return Vk_CreateBuffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT, size, buffer);
 }
 
+qboolean Vk_CreateUniformBuffer(VkDeviceSize size, vkbuffer_t *buffer)
+{
+    return Vk_CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, size, buffer);
+}
+
 void Vk_DestroyBuffer(vkbuffer_t *buffer)
 {
     if (buffer->memory)

@@ -389,6 +389,7 @@ void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader);
 VkPipeline Vk_CreateDefaultPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag);
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
+qboolean Vk_CreateUniformBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 void Vk_DestroyBuffer(vkbuffer_t *buffer);
 
 /*
