@@ -125,6 +125,31 @@ cvar_t	*vid_ref;
 
 
 /*
+=================
+R_CullBox
+
+Returns true if the box is completely outside the frustom
+=================
+*/
+qboolean R_CullBox(vec3_t mins, vec3_t maxs)
+{
+    int		i;
+
+    if (r_nocull->value)
+        return false;
+
+    for (i = 0; i<4; i++)
+        if (BOX_ON_PLANE_SIDE(mins, maxs, &frustum[i]) == 2)
+            return true;
+    return false;
+}
+
+
+void R_RotateForEntity(entity_t *e)
+{
+}
+
+/*
 =============================================================
 
 SPRITE MODELS
@@ -161,6 +186,89 @@ R_DrawEntitiesOnList
 */
 void R_DrawEntitiesOnList(void)
 {
+    int		i;
+
+    if (!r_drawentities->value)
+        return;
+
+    // draw non-transparent first
+    for (i = 0; i<r_newrefdef.num_entities; i++)
+    {
+        currententity = &r_newrefdef.entities[i];
+        if (currententity->flags & RF_TRANSLUCENT)
+            continue;	// solid
+
+        if (currententity->flags & RF_BEAM)
+        {
+            R_DrawBeam(currententity);
+        }
+        else
+        {
+            currentmodel = currententity->model;
+            if (!currentmodel)
+            {
+                R_DrawNullModel();
+                continue;
+            }
+            switch (currentmodel->type)
+            {
+            case mod_alias:
+                R_DrawAliasModel(currententity);
+                break;
+            case mod_brush:
+                //R_DrawBrushModel(currententity);
+                break;
+            case mod_sprite:
+                //R_DrawSpriteModel(currententity);
+                break;
+            default:
+                ri.Sys_Error(ERR_DROP, "Bad modeltype");
+                break;
+            }
+        }
+    }
+
+    // draw transparent entities
+    // we could sort these if it ever becomes a problem...
+    //qglDepthMask(0);		// no z writes
+    for (i = 0; i<r_newrefdef.num_entities; i++)
+    {
+        currententity = &r_newrefdef.entities[i];
+        if (!(currententity->flags & RF_TRANSLUCENT))
+            continue;	// solid
+
+        if (currententity->flags & RF_BEAM)
+        {
+            R_DrawBeam(currententity);
+        }
+        else
+        {
+            currentmodel = currententity->model;
+
+            if (!currentmodel)
+            {
+                R_DrawNullModel();
+                continue;
+            }
+            switch (currentmodel->type)
+            {
+            case mod_alias:
+                R_DrawAliasModel(currententity);
+                break;
+            case mod_brush:
+                //R_DrawBrushModel(currententity);
+                break;
+            case mod_sprite:
+                //R_DrawSpriteModel(currententity);
+                break;
+            default:
+                ri.Sys_Error(ERR_DROP, "Bad modeltype");
+                break;
+            }
+        }
+    }
+    //qglDepthMask(1);		// back to writing
+
 }
 
 /*
@@ -181,6 +289,23 @@ void R_PolyBlend(void)
 {
 }
 
+//=======================================================================
+
+int SignbitsForPlane(cplane_t *out)
+{
+    int	bits, j;
+
+    // for fast box on planeside test
+
+    bits = 0;
+    for (j = 0; j<3; j++)
+    {
+        if (out->normal[j] < 0)
+            bits |= 1 << j;
+    }
+    return bits;
+}
+
 /*
 ============
 R_SetFrustum
@@ -188,6 +313,42 @@ R_SetFrustum
 */
 void R_SetFrustum(void)
 {
+    int		i;
+
+#if 0
+    /*
+    ** this code is wrong, since it presume a 90 degree FOV both in the
+    ** horizontal and vertical plane
+    */
+    // front side is visible
+    VectorAdd(vpn, vright, frustum[0].normal);
+    VectorSubtract(vpn, vright, frustum[1].normal);
+    VectorAdd(vpn, vup, frustum[2].normal);
+    VectorSubtract(vpn, vup, frustum[3].normal);
+
+    // we theoretically don't need to normalize these vectors, but I do it
+    // anyway so that debugging is a little easier
+    VectorNormalize(frustum[0].normal);
+    VectorNormalize(frustum[1].normal);
+    VectorNormalize(frustum[2].normal);
+    VectorNormalize(frustum[3].normal);
+#else
+    // rotate VPN right by FOV_X/2 degrees
+    RotatePointAroundVector(frustum[0].normal, vup, vpn, -(90 - r_newrefdef.fov_x / 2));
+    // rotate VPN left by FOV_X/2 degrees
+    RotatePointAroundVector(frustum[1].normal, vup, vpn, 90 - r_newrefdef.fov_x / 2);
+    // rotate VPN up by FOV_X/2 degrees
+    RotatePointAroundVector(frustum[2].normal, vright, vpn, 90 - r_newrefdef.fov_y / 2);
+    // rotate VPN down by FOV_X/2 degrees
+    RotatePointAroundVector(frustum[3].normal, vright, vpn, -(90 - r_newrefdef.fov_y / 2));
+#endif
+
+    for (i = 0; i<4; i++)
+    {
+        frustum[i].type = PLANE_ANYZ;
+        frustum[i].dist = DotProduct(r_origin, frustum[i].normal);
+        frustum[i].signbits = SignbitsForPlane(&frustum[i]);
+    }
 }
 
 //=======================================================================
@@ -199,6 +360,60 @@ R_SetupFrame
 */
 void R_SetupFrame(void)
 {
+    int i;
+    mleaf_t	*leaf;
+
+    r_framecount++;
+
+    // build the transformation matrix for the given view angles
+    VectorCopy(r_newrefdef.vieworg, r_origin);
+
+    AngleVectors(r_newrefdef.viewangles, vpn, vright, vup);
+
+    // current viewcluster
+    if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+    {
+        r_oldviewcluster = r_viewcluster;
+        r_oldviewcluster2 = r_viewcluster2;
+        leaf = Mod_PointInLeaf(r_origin, r_worldmodel);
+        r_viewcluster = r_viewcluster2 = leaf->cluster;
+
+        // check above and below so crossing solid water doesn't draw wrong
+        if (!leaf->contents)
+        {	// look down a bit
+            vec3_t	temp;
+
+            VectorCopy(r_origin, temp);
+            temp[2] -= 16;
+            leaf = Mod_PointInLeaf(temp, r_worldmodel);
+            if (!(leaf->contents & CONTENTS_SOLID) &&
+                (leaf->cluster != r_viewcluster2))
+                r_viewcluster2 = leaf->cluster;
+        }
+        else
+        {	// look up a bit
+            vec3_t	temp;
+
+            VectorCopy(r_origin, temp);
+            temp[2] += 16;
+            leaf = Mod_PointInLeaf(temp, r_worldmodel);
+            if (!(leaf->contents & CONTENTS_SOLID) &&
+                (leaf->cluster != r_viewcluster2))
+                r_viewcluster2 = leaf->cluster;
+        }
+    }
+
+    for (i = 0; i<4; i++)
+        v_blend[i] = r_newrefdef.blend[i];
+
+    c_brush_polys = 0;
+    c_alias_polys = 0;
+
+    // clear out the portion of the screen that the NOWORLDMODEL defines
+    if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+    {
+        // TODO:
+    }
 }
 
 /*
@@ -266,6 +481,53 @@ r_newrefdef must be set before the first call
 */
 void R_RenderView(refdef_t *fd)
 {
+    if (r_norefresh->value)
+        return;
+
+    r_newrefdef = *fd;
+
+    if (!r_worldmodel && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+        ri.Sys_Error(ERR_DROP, "R_RenderView: NULL worldmodel");
+
+    if (r_speeds->value)
+    {
+        c_brush_polys = 0;
+        c_alias_polys = 0;
+    }
+
+    R_PushDlights();
+
+    //if (vk_finish->value)
+    //    sync();
+
+    R_SetupFrame();
+
+    R_SetFrustum();
+
+    //R_SetupGL();
+
+    R_MarkLeaves();	// done here so we know if we're in water
+
+    R_DrawWorld();
+
+    R_DrawEntitiesOnList();
+
+    R_RenderDlights();
+
+    R_DrawParticles();
+
+    R_DrawAlphaSurfaces();
+
+    R_Flash();
+
+    if (r_speeds->value)
+    {
+        ri.Con_Printf(PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
+            c_brush_polys,
+            c_alias_polys,
+            c_visible_textures,
+            c_visible_lightmaps);
+    }
 }
 
 /*
@@ -276,6 +538,32 @@ R_SetLightLevel
 */
 void R_SetLightLevel(void)
 {
+    vec3_t		shadelight;
+
+    if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+        return;
+
+    // save off light value for server to look at (BIG HACK!)
+
+    R_LightPoint(r_newrefdef.vieworg, shadelight);
+
+    // pick the greatest component, which should be the same
+    // as the mono value returned by software
+    if (shadelight[0] > shadelight[1])
+    {
+        if (shadelight[0] > shadelight[2])
+            r_lightlevel->value = 150 * shadelight[0];
+        else
+            r_lightlevel->value = 150 * shadelight[2];
+    }
+    else
+    {
+        if (shadelight[1] > shadelight[2])
+            r_lightlevel->value = 150 * shadelight[1];
+        else
+            r_lightlevel->value = 150 * shadelight[2];
+    }
+
 }
 
 /*
@@ -286,6 +574,9 @@ R_RenderFrame
 */
 void R_RenderFrame(refdef_t *fd)
 {
+    R_RenderView(fd);
+    R_SetLightLevel();
+    //R_SetGL2D();
 }
 
 
