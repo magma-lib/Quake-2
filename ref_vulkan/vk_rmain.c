@@ -748,9 +748,9 @@ static void R_InitContextObjects()
     cmdbuf_alloc_info.pNext = NULL;
     cmdbuf_alloc_info.commandPool = vk_context.cmdpool;
     cmdbuf_alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdbuf_alloc_info.commandBufferCount = 2;
+    cmdbuf_alloc_info.commandBufferCount = 1;
 
-    vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, vk_context.cmdbuf);
+    vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, &vk_context.cmdbuffer);
 }
 
 /*
