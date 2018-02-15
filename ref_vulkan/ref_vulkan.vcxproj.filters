@@ -106,5 +106,8 @@
     <ClCompile Include="vk_shader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vk_dset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
