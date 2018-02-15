@@ -92,8 +92,6 @@ void VK_DestroyRenderPass()
     }
 }
 
-void VK_DestroyFramebuffer();
-
 qboolean VK_CreateFramebuffer()
 {
     VkImageCreateInfo info;
