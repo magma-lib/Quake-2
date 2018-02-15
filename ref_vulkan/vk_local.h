@@ -320,15 +320,20 @@ typedef struct
     VkFence             fences[2];
 
     VkCommandPool       cmdpool;
-    VkCommandBuffer     cmdbuf[2];
+    VkCommandBuffer     cmdbuffer;
 
     VkExtent2D          extent;
     vkimage_t           front;
     vkimage_t           back;
     vkimage_t           depth_stencil;
+
     VkRenderPass        renderpass;
     VkFramebuffer       framebuffers[2];
+    VkFramebuffer       curr_framebuffer;
     VkImage             *swap_images;
+
+    VkPipelineLayout    pipeline_layout;
+    VkPipeline          pipeline;
 
     VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;
