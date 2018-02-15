@@ -459,7 +459,7 @@ void R_SetViewport(void)
     viewport.x = 0.f;
     viewport.y = 0.f;
     viewport.width = (float)vk_context.extent.width;
-    viewport.height = (float)vk_context.extent.height;
+    viewport.height = -(float)vk_context.extent.height; // Inverse Y axis to match OpenGL
     viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f;
 
