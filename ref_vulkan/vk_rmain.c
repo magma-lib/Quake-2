@@ -455,18 +455,27 @@ void R_SetViewport(void)
 {
     VkViewport viewport;
     VkRect2D scissor;
+    int	x, x2, y2, y, w, h;
+    
+    x = floor(r_newrefdef.x * vid.width / vid.width);
+    x2 = ceil((r_newrefdef.x + r_newrefdef.width) * vid.width / vid.width);
+    y = floor(vid.height - r_newrefdef.y * vid.height / vid.height);
+    y2 = ceil(vid.height - (r_newrefdef.y + r_newrefdef.height) * vid.height / vid.height);
 
-    viewport.x = 0.f;
-    viewport.y = 0.f;
-    viewport.width = (float)vk_context.extent.width;
-    viewport.height = -(float)vk_context.extent.height; // Inverse Y axis to match OpenGL
+    w = x2 - x;
+    h = y - y2;
+
+    viewport.x = x;
+    viewport.y = y2;
+    viewport.width = w;
+    viewport.height = -h; // Inverse Y axis to match OpenGL
     viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f;
 
-    scissor.offset.x = 0;
-    scissor.offset.y = 0;
-    scissor.extent.width = vk_context.extent.width;
-    scissor.extent.height = vk_context.extent.height;
+    scissor.offset.x = x;
+    scissor.offset.y = y2;
+    scissor.extent.width = w;
+    scissor.extent.height = h;
 
     vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &viewport);
     vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &scissor);
