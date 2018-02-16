@@ -67,7 +67,7 @@ qboolean VK_CreateRenderPass()
     renderpass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderpass_info.pNext = NULL;
     renderpass_info.flags = 0;
-    renderpass_info.attachmentCount = 2;
+    renderpass_info.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
     renderpass_info.pAttachments = attachments;
     renderpass_info.subpassCount = 1;
     renderpass_info.pSubpasses = &subpass_desc;
