@@ -275,6 +275,7 @@
     <ClInclude Include="..\win32\winquake.h" />
     <ClInclude Include="anorms.h" />
     <ClInclude Include="anormtab.h" />
+    <ClInclude Include="dxmath.h" />
     <ClInclude Include="vk_local.h" />
     <ClInclude Include="vk_model.h" />
     <ClInclude Include="warpsin.h" />
