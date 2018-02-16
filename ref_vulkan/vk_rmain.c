@@ -538,20 +538,20 @@ void R_SetModelViewProjection()
     rx = XMMatrixRotationX(-viewangles[2]);
     ry = XMMatrixRotationY(-viewangles[0]);
     rz = XMMatrixRotationZ(-viewangles[1]);
-    //tr = XMMatrixTranslation(-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
-    tr = XMMatrixTranslation(0.f, 0.f, r_newrefdef.vieworg[2]);
+    tr = XMMatrixTranslation(-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
+    //tr = XMMatrixTranslation(0.f, 0.f, r_newrefdef.vieworg[2]);
 
     view = XMMatrixMultiply(&tr, &rz);
     view = XMMatrixMultiply(&view, &ry);
     view = XMMatrixMultiply(&view, &rx);
-    //view = XMMatrixMultiply(&view, &z_up[1]);
-    //view = XMMatrixMultiply(&view, &z_up[0]);
+    view = XMMatrixMultiply(&view, &z_up[1]);
+    view = XMMatrixMultiply(&view, &z_up[0]);
+
+    r_viewproj = XMMatrixMultiply(&view, &proj);
 
     if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &data) == VK_SUCCESS)
     {
-        XMMATRIX view_proj;
-        view_proj = XMMatrixMultiply(&view, &proj);
-        memcpy(data, &view_proj, sizeof(XMMATRIX));
+        memcpy(data, &r_viewproj, sizeof(XMMATRIX));
         vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
     }
 }
