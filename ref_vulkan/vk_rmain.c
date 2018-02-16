@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "vk_local.h"
+#include "dxmath.h"
 
 void R_Clear(void);
 
@@ -479,6 +480,56 @@ void R_SetViewport(void)
 
     vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &viewport);
     vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &scissor);
+}
+
+/*
+=============
+R_SetModelViewProjection
+=============
+*/
+void R_SetModelViewProjection()
+{
+    float    fov_y;
+    float    screenaspect;
+    float    znear, zfar;
+    float    viewangles[3], rad90;
+    XMMATRIX z_up[2], rx, ry, rz, tr;
+    XMMATRIX proj, view;
+    void     *data;
+
+    fov_y = XMConvertToRadians(r_newrefdef.fov_y);
+    screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
+    znear = 4.f;
+    zfar = 4096.f;
+
+    proj = XMMatrixPerspectiveFovRH(fov_y, screenaspect, znear, zfar);
+
+    viewangles[0] = XMConvertToRadians(r_newrefdef.viewangles[0]);
+    viewangles[1] = XMConvertToRadians(r_newrefdef.viewangles[1]);
+    viewangles[2] = XMConvertToRadians(r_newrefdef.viewangles[2]);
+
+    rad90 = XMConvertToRadians(90.0f);
+    z_up[0] = XMMatrixRotationX(-rad90);   // put Z going up
+    z_up[1] = XMMatrixRotationZ(rad90);    // put Z going up
+    rx = XMMatrixRotationX(-viewangles[2]);
+    ry = XMMatrixRotationY(-viewangles[0]);
+    rz = XMMatrixRotationZ(-viewangles[1]);
+    //tr = XMMatrixTranslation(-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
+    tr = XMMatrixTranslation(0.f, 0.f, r_newrefdef.vieworg[2]);
+
+    view = XMMatrixMultiply(&tr, &rz);
+    view = XMMatrixMultiply(&view, &ry);
+    view = XMMatrixMultiply(&view, &rx);
+    //view = XMMatrixMultiply(&view, &z_up[1]);
+    //view = XMMatrixMultiply(&view, &z_up[0]);
+
+    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &data) == VK_SUCCESS)
+    {
+        XMMATRIX view_proj;
+        view_proj = XMMatrixMultiply(&view, &proj);
+        memcpy(data, &view_proj, sizeof(XMMATRIX));
+        vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
+    }
 }
 
 /*
