@@ -843,7 +843,7 @@ qboolean R_Init(void *hinstance, void *hWnd)
     };
     const char *dev_extensions[] = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_KHR_MAINTENANCE1_EXTENSION_NAME
+        VK_AMD_NEGATIVE_VIEWPORT_HEIGHT_EXTENSION_NAME
     };
 
     VkApplicationInfo app_info;
