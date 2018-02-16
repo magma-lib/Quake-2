@@ -344,5 +344,8 @@ XMGLOBALCONST XMVECTORF32 g_ShortMin = { { { -32767.0f, -32767.0f, -32767.0f, -3
 XMGLOBALCONST XMVECTORF32 g_ShortMax = { { { 32767.0f, 32767.0f, 32767.0f, 32767.0f } } };
 XMGLOBALCONST XMVECTORF32 g_UShortMax = { { { 65535.0f, 65535.0f, 65535.0f, 65535.0f } } };
 
+float XMConvertToRadians(float fDegrees) { return fDegrees * (XM_PI / 180.0f); }
+float XMConvertToDegrees(float fRadians) { return fRadians * (180.0f / XM_PI); }
+
 #include "dxmvector.inl"
 #include "dxmmatrix.inl"
