@@ -62,6 +62,7 @@ vec3_t	r_origin;
 
 float	r_world_matrix[16];
 float	r_base_world_matrix[16];
+XMMATRIX r_viewproj;
 
 //
 // screen size info
@@ -145,9 +146,32 @@ qboolean R_CullBox(vec3_t mins, vec3_t maxs)
     return false;
 }
 
-
 void R_RotateForEntity(entity_t *e)
 {
+    float       angles[3];
+    XMMATRIX    rx, ry, rz, tr;
+    XMMATRIX    world, worldviewproj;
+    void        *data;
+    
+    angles[0] = XMConvertToRadians(e->angles[0]);
+    angles[1] = XMConvertToRadians(e->angles[1]);
+    angles[2] = XMConvertToRadians(e->angles[2]);
+
+    rx = XMMatrixRotationX(-angles[2]);
+    ry = XMMatrixRotationY(-angles[0]);
+    rz = XMMatrixRotationZ(angles[1]);
+    tr = XMMatrixTranslation(e->origin[0], e->origin[1], e->origin[2]);
+
+    world = XMMatrixMultiply(&rx, &ry);
+    world = XMMatrixMultiply(&world, &rz);
+    world = XMMatrixMultiply(&world, &tr);
+    worldviewproj = XMMatrixMultiply(&world, &r_viewproj);
+
+    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &data) == VK_SUCCESS)
+    {
+        memcpy(data, &worldviewproj, sizeof(XMMATRIX));
+        vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
+    }
 }
 
 /*
