@@ -100,6 +100,7 @@ qboolean VK_CreateFramebuffer()
     VkMemoryAllocateInfo mem;
     VkImageView attachments[2];
     VkFramebufferCreateInfo fb_info;
+    int i;
 
     // depth image
     info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -189,9 +190,6 @@ qboolean VK_CreateFramebuffer()
     view_info.image = vk_context.swap_images[1];
     vkCreateImageView(vk_context.device, &view_info, NULL, &vk_context.back.view);
 
-    attachments[0] = vk_context.front.view;
-    attachments[1] = vk_context.depth_stencil.view;
-
     // framebuffer
     fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     fb_info.pNext = NULL;
@@ -203,19 +201,17 @@ qboolean VK_CreateFramebuffer()
     fb_info.height = vk_context.extent.height;
     fb_info.layers = 1;
 
-    if (vkCreateFramebuffer(vk_context.device, &fb_info, NULL, &vk_context.framebuffers[0]) != VK_SUCCESS)
-    {
-        VK_DestroyFramebuffer();
-        ri.Con_Printf(PRINT_ALL, "Failed to create framebuffer\n");
-        return false;
-    }
+    attachments[1] = vk_context.depth_stencil.view;
 
-    attachments[0] = vk_context.back.view;
-    if (vkCreateFramebuffer(vk_context.device, &fb_info, NULL, &vk_context.framebuffers[1]) != VK_SUCCESS)
+    for (i = 0; i < 2; ++i)
     {
-        VK_DestroyFramebuffer();
-        ri.Con_Printf(PRINT_ALL, "Failed to create framebuffer\n");
-        return false;
+        attachments[0] = (i == 0) ? vk_context.front.view : vk_context.back.view;
+        if (vkCreateFramebuffer(vk_context.device, &fb_info, NULL, &vk_context.framebuffers[i]) != VK_SUCCESS)
+        {
+            VK_DestroyFramebuffer();
+            ri.Con_Printf(PRINT_ALL, "Failed to create framebuffer\n");
+            return false;
+        }
     }
 
     return true;
