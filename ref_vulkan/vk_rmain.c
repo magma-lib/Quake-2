@@ -27,6 +27,7 @@ viddef_t	vid;
 refimport_t	ri;
 
 vkcontext_t vk_context;
+vkshaders_t vk_shaders;
 vkconfig_t  vk_config;
 vkstate_t   vk_state;
 
@@ -884,13 +885,9 @@ static void R_InitContextObjects()
 
     vkCreatePipelineLayout(vk_context.device, &layout_info, NULL, &vk_context.pipeline_layout);
 
-    VkPipelineShaderStageCreateInfo vert;
-    VkPipelineShaderStageCreateInfo frag;
-    Vk_LoadShader("transform.o", "main", true, &vert);
-    Vk_LoadShader("fill.o", "main", false, &frag);
-
-    vk_context.pipeline_tri_strip = Vk_CreateDefaultPipeline(vert, frag, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
-    vk_context.pipeline_tri_fan = Vk_CreateDefaultPipeline(vert, frag, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
+    vk_context.pipeline_world = Vk_CreateWorldPipeline(vk_shaders.tnl_world_v, vk_shaders.tnl_world_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    vk_context.pipeline_tri_strip = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
+    vk_context.pipeline_tri_fan = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
 }
 
 /*
