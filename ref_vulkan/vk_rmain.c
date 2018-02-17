@@ -608,6 +608,8 @@ void R_RenderView(refdef_t *fd)
         c_alias_polys = 0;
     }
 
+    current_mvp_offset = 0;
+
     R_PushDlights();
 
     //if (vk_finish->value)
