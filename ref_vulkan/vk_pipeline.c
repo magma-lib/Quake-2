@@ -46,11 +46,11 @@ VkPipeline Vk_CreateDefaultPipeline(
     stages[1] = frag;
 
     vertex_binding.binding = 0;
-    vertex_binding.stride = sizeof(vec3_t);
+    vertex_binding.stride = sizeof(float) * 4; // see gl_mesh.c, ln 159
     vertex_binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     vertex_attrib.location = 0;
     vertex_attrib.binding = 0;
-    vertex_attrib.format = VK_FORMAT_R32G32B32_SFLOAT;
+    vertex_attrib.format = VK_FORMAT_R32G32B32A32_SFLOAT;
     vertex_attrib.offset = 0;
 
     vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -64,7 +64,7 @@ VkPipeline Vk_CreateDefaultPipeline(
     assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     assembly.pNext = NULL;
     assembly.flags = 0;
-    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     assembly.primitiveRestartEnable = VK_FALSE;
 
     viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
