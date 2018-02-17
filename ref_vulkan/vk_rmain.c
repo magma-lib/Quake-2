@@ -42,6 +42,7 @@ image_t		*r_particletexture;	// little dot for particles
 
 entity_t	*currententity;
 model_t		*currentmodel;
+uint32_t    current_mvp_offset;
 
 cplane_t	frustum[4];
 
@@ -167,11 +168,18 @@ void R_RotateForEntity(entity_t *e)
     world = XMMatrixMultiply(&world, &tr);
     worldviewproj = XMMatrixMultiply(&world, &r_viewproj);
 
-    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &data) == VK_SUCCESS)
+    // TODO: write to tmp buffer, copy to uniform buffer before command buffer execution
+    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, current_mvp_offset, sizeof(XMMATRIX), 0, &data) == VK_SUCCESS)
     {
         memcpy(data, &worldviewproj, sizeof(XMMATRIX));
         vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
     }
+
+    vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout,
+        0, 1, &vk_context.dset,
+        1, &current_mvp_offset); // fetch transform from specified offset during cmdbuffer execution
+
+    current_mvp_offset += sizeof(XMMATRIX);
 }
 
 /*
@@ -215,6 +223,8 @@ void R_DrawEntitiesOnList(void)
 
     if (!r_drawentities->value)
         return;
+
+    current_mvp_offset = 0;
 
     // draw non-transparent first
     for (i = 0; i<r_newrefdef.num_entities; i++)
