@@ -50,7 +50,7 @@ qboolean Vk_DSetSetupLayout()
     VkDescriptorSetLayoutCreateInfo layout_info;
     VkDescriptorSetAllocateInfo alloc_info;
     
-    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     pool_sizes[0].descriptorCount = 1;
 
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -67,7 +67,7 @@ qboolean Vk_DSetSetupLayout()
     }
 
     bindings[0].binding = 0;
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     bindings[0].descriptorCount = 1;
     bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     bindings[0].pImmutableSamplers = NULL;
@@ -96,7 +96,7 @@ qboolean Vk_DSetSetupLayout()
         return false;
     }
 
-    if (!Vk_CreateUniformBuffer(sizeof(float) * 4 * 4, &vk_context.per_object))
+    if (!Vk_CreateUniformBuffer(sizeof(float) * 16 * MAX_ENTITIES, &vk_context.per_object))
     {
         ri.Con_Printf(PRINT_ALL, "Couldn't create per-object uniform buffer\n");
         return false;
