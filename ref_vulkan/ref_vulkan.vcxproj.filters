@@ -56,10 +56,16 @@
     <CustomBuild Include="ref_vulkan.def">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="shaders\transform.vert">
+    <CustomBuild Include="shaders\fill.frag">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="shaders\fill.frag">
+    <CustomBuild Include="shaders\tnl_world_v.vert">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shaders\tnl_alias_v.vert">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shaders\tnl_alias_f.frag">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
