@@ -92,7 +92,7 @@ void VK_DestroyRenderPass()
     }
 }
 
-qboolean VK_CreateFramebuffer()
+qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height)
 {
     VkImageCreateInfo info;
     VkImageViewCreateInfo view_info;
@@ -108,8 +108,8 @@ qboolean VK_CreateFramebuffer()
     info.flags = 0;
     info.imageType = VK_IMAGE_TYPE_2D;
     info.format = VK_FORMAT_D32_SFLOAT;
-    info.extent.width = vk_context.extent.width;
-    info.extent.height = vk_context.extent.height;
+    info.extent.width = width;
+    info.extent.height = height;
     info.extent.depth = 1;
     info.mipLevels = 1;
     info.arrayLayers = 1;
@@ -197,8 +197,8 @@ qboolean VK_CreateFramebuffer()
     fb_info.renderPass = vk_context.renderpass;
     fb_info.attachmentCount = 2;
     fb_info.pAttachments = attachments;
-    fb_info.width = vk_context.extent.width;
-    fb_info.height = vk_context.extent.height;
+    fb_info.width = width;
+    fb_info.height = height;
     fb_info.layers = 1;
 
     attachments[1] = vk_context.depth_stencil.view;

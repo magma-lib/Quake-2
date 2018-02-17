@@ -475,7 +475,8 @@ void R_Clear(void)
     render_pass_begin.framebuffer = vk_context.curr_framebuffer;
     render_pass_begin.renderArea.offset.x = 0;
     render_pass_begin.renderArea.offset.y = 0;
-    render_pass_begin.renderArea.extent = vk_context.extent;
+    render_pass_begin.renderArea.extent.width = vid.width;
+    render_pass_begin.renderArea.extent.height = vid.height;
     render_pass_begin.clearValueCount = 2;
     render_pass_begin.pClearValues = clear_values;
 
@@ -870,7 +871,7 @@ static void R_InitContextObjects()
     vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, &vk_context.cmdbuffer);
 
     VK_CreateRenderPass();
-    VK_CreateFramebuffer();
+    VK_CreateFramebuffer(vid.width, vid.height);
     Vk_DSetSetupLayout();
 
     ////////////////////////
