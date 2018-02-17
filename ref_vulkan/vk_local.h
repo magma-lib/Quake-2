@@ -340,6 +340,7 @@ typedef struct
     vkbuffer_t          per_object;
 
     VkPipelineLayout    pipeline_layout;
+    VkPipeline          pipeline_world;
     VkPipeline          pipeline_tri_strip;
     VkPipeline          pipeline_tri_fan;
 
@@ -396,6 +397,8 @@ qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean ve
 void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader);
 qboolean Vk_DSetSetupLayout();
 VkPipeline Vk_CreateDefaultPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
+    VkPrimitiveTopology topology);
+VkPipeline Vk_CreateWorldPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
     VkPrimitiveTopology topology);
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
