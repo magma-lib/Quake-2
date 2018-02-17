@@ -573,10 +573,7 @@ R_BindGraphicsPipeline
 */
 void R_BindGraphicsPipeline(void)
 {
-    vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline);
-    vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 
-        0, 1, &vk_context.dset, 
-        0, NULL);
+    vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_strip);
 }
 
 void R_Flash(void)
@@ -617,6 +614,7 @@ void R_RenderView(refdef_t *fd)
     R_SetFrustum();
     R_SetViewport();
     R_BindGraphicsPipeline();
+    R_SetModelViewProjection();
 
     //R_SetupGL();
 
@@ -850,6 +848,32 @@ static void R_InitContextObjects()
     cmdbuf_alloc_info.commandBufferCount = 1;
 
     vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, &vk_context.cmdbuffer);
+
+    VK_CreateRenderPass();
+    VK_CreateFramebuffer();
+    Vk_DSetSetupLayout();
+
+    ////////////////////////
+
+    VkPipelineLayoutCreateInfo layout_info;
+
+    layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    layout_info.pNext = NULL;
+    layout_info.flags = 0;
+    layout_info.setLayoutCount = 1;
+    layout_info.pSetLayouts = &vk_context.dset_layout;
+    layout_info.pushConstantRangeCount = 0;
+    layout_info.pPushConstantRanges = NULL;
+
+    vkCreatePipelineLayout(vk_context.device, &layout_info, NULL, &vk_context.pipeline_layout);
+
+    VkPipelineShaderStageCreateInfo vert;
+    VkPipelineShaderStageCreateInfo frag;
+    Vk_LoadShader("transform.o", "main", true, &vert);
+    Vk_LoadShader("fill.o", "main", false, &frag);
+
+    vk_context.pipeline_tri_strip = Vk_CreateDefaultPipeline(vert, frag, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
+    vk_context.pipeline_tri_fan = Vk_CreateDefaultPipeline(vert, frag, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
 }
 
 /*

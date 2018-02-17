@@ -21,7 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 VkPipeline Vk_CreateDefaultPipeline(
     VkPipelineShaderStageCreateInfo vert, 
-    VkPipelineShaderStageCreateInfo frag)
+    VkPipelineShaderStageCreateInfo frag,
+    VkPrimitiveTopology topology)
 {
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkGraphicsPipelineCreateInfo gp;
@@ -64,7 +65,7 @@ VkPipeline Vk_CreateDefaultPipeline(
     assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     assembly.pNext = NULL;
     assembly.flags = 0;
-    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    assembly.topology = topology;
     assembly.primitiveRestartEnable = VK_FALSE;
 
     viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

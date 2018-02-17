@@ -212,8 +212,6 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                 first_index = 0;
                 while (1)
                 {
-                    VkPrimitiveTopology topology;
-
                     // get the vertex count and primitive type
                     count = *order++;
                     if (!count)
@@ -221,11 +219,11 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                     if (count < 0)
                     {
                         count = -count;
-                        topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+                        vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_fan);
                     }
                     else
                     {
-                        topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+                        vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_strip);
                     }
 
                     // PMM - added double damage shell
@@ -249,8 +247,8 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                             *indices++ = (unsigned short)order[2];
                             order += 3;
                         }
-                        if (VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP == topology) // it is controlled by pipeline state object
-                            vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
+
+                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
                         first_index += count;
                     }
                 }
