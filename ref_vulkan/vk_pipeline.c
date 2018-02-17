@@ -27,8 +27,8 @@ VkPipeline Vk_CreateDefaultPipeline(
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkGraphicsPipelineCreateInfo gp;
     VkPipelineShaderStageCreateInfo stages[2];
-    VkVertexInputBindingDescription vertex_binding;
-    VkVertexInputAttributeDescription vertex_attrib;
+    VkVertexInputBindingDescription vertex_bindings[3];
+    VkVertexInputAttributeDescription vertex_attribs[3];
     VkPipelineVertexInputStateCreateInfo vertex_input;
     VkPipelineInputAssemblyStateCreateInfo assembly;
     VkPipelineViewportStateCreateInfo viewport;
@@ -46,21 +46,42 @@ VkPipeline Vk_CreateDefaultPipeline(
     stages[0] = vert;
     stages[1] = frag;
 
-    vertex_binding.binding = 0;
-    vertex_binding.stride = sizeof(float) * 4; // see gl_mesh.c, ln 159
-    vertex_binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    vertex_attrib.location = 0;
-    vertex_attrib.binding = 0;
-    vertex_attrib.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-    vertex_attrib.offset = 0;
+    // position
+    vertex_bindings[0].binding = 0;
+    vertex_bindings[0].stride = sizeof(float) * 4; // see gl_mesh.c, ln 159
+    vertex_bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    // color
+    vertex_bindings[1].binding = 1;
+    vertex_bindings[1].stride = sizeof(float) * 3; 
+    vertex_bindings[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    // texcoord
+    vertex_bindings[2].binding = 2;
+    vertex_bindings[2].stride = sizeof(float) * 2; 
+    vertex_bindings[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    // position
+    vertex_attribs[0].location = 0;
+    vertex_attribs[0].binding = 0;
+    vertex_attribs[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+    vertex_attribs[0].offset = 0;
+    // color
+    vertex_attribs[1].location = 1;
+    vertex_attribs[1].binding = 1;
+    vertex_attribs[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    vertex_attribs[1].offset = 0;
+    // texcoord
+    vertex_attribs[2].location = 2;
+    vertex_attribs[2].binding = 2;
+    vertex_attribs[2].format = VK_FORMAT_R32G32_SFLOAT;
+    vertex_attribs[2].offset = 0;
 
     vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertex_input.pNext = NULL;
     vertex_input.flags = 0;
-    vertex_input.vertexBindingDescriptionCount = 1;
-    vertex_input.pVertexBindingDescriptions = &vertex_binding;
-    vertex_input.vertexAttributeDescriptionCount = 1;
-    vertex_input.pVertexAttributeDescriptions = &vertex_attrib;
+    vertex_input.vertexBindingDescriptionCount = sizeof(vertex_bindings)/sizeof(vertex_bindings[0]);
+    vertex_input.pVertexBindingDescriptions = vertex_bindings;
+    vertex_input.vertexAttributeDescriptionCount = sizeof(vertex_attribs) / sizeof(vertex_attribs[0]);
+    vertex_input.pVertexAttributeDescriptions = vertex_attribs;
 
     assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     assembly.pNext = NULL;
