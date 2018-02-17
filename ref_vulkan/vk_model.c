@@ -350,6 +350,8 @@ void Mod_LoadVertexes (lump_t *l)
 		out->position[1] = LittleFloat (in->point[1]);
 		out->position[2] = LittleFloat (in->point[2]);
 	}
+
+    Vk_CreateVertexBuffer(loadmodel->numvertexes * sizeof(float) * VERTEXSIZE * 2, &loadmodel->vertex_buffer); // xyz s1t1 s2t2
 }
 
 /*
