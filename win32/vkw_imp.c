@@ -412,7 +412,7 @@ void VKimp_BeginFrame(float camera_separation)
         VK_NULL_HANDLE,
         &vkw_state.image_index) != VK_SUCCESS)
     {
-        ri.Con_Printf(PRINT_ALL, "VKimp_BeginFrame() - couldn't acquire next image\n");
+        ri.Sys_Error(ERR_FATAL, "VKimp_BeginFrame() - couldn't acquire next image\n");
     }
 
     vkWaitForFences(vk_context.device, 1, &vk_context.fences[vkw_state.image_index], VK_TRUE, UINT64_MAX);
