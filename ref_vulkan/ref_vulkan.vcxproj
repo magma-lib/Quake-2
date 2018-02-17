@@ -303,6 +303,38 @@
     <ClCompile Include="vk_shader.c" />
     <ClCompile Include="vk_warp.c" />
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="shaders\fill.frag">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling fill.frag</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling fill.frag</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling fill.frag</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling fill.frag</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="shaders\transform.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling transform.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling transform.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling transform.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling transform.vert</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+    </CustomBuild>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
