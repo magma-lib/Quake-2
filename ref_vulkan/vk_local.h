@@ -264,6 +264,8 @@ qboolean R_CullBox(vec3_t mins, vec3_t maxs);
 void R_RotateForEntity(entity_t *e);
 void R_MarkLeaves(void);
 
+vkpoly_t *WaterWarpPolyVerts(vkpoly_t *p);
+void EmitWaterPolys(msurface_t *fa);
 void R_AddSkySurface(msurface_t *fa);
 void R_ClearSkyBox(void);
 void R_DrawSkyBox(void);
