@@ -142,7 +142,7 @@ VkPipeline Vk_CreateDefaultPipeline(
     dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamic.pNext = NULL;
     dynamic.flags = 0;
-    dynamic.dynamicStateCount = 2;
+    dynamic.dynamicStateCount = sizeof(dynamic_states)/sizeof(dynamic_states[0]);
     dynamic_states[0] = VK_DYNAMIC_STATE_VIEWPORT;
     dynamic_states[1] = VK_DYNAMIC_STATE_SCISSOR;
     dynamic.pDynamicStates = dynamic_states;
