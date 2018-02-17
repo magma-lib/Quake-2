@@ -249,7 +249,8 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                             *indices++ = (unsigned short)order[2];
                             order += 3;
                         }
-                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
+                        if (VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP == topology) // it is controlled by pipeline state object
+                            vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
                         first_index += count;
                     }
                 }
