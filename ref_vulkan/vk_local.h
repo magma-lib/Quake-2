@@ -324,7 +324,6 @@ typedef struct
     VkCommandPool       cmdpool;
     VkCommandBuffer     cmdbuffer;
 
-    VkExtent2D          extent;
     vkimage_t           front;
     vkimage_t           back;
     vkimage_t           depth_stencil;
