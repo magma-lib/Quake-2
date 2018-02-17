@@ -207,9 +207,8 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         {
             if (vkMapMemory(vk_context.device, mod->index_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&indices) == VK_SUCCESS)
             {
-                uint32_t first_index;
+                uint32_t first = 0;
 
-                first_index = 0;
                 while (1)
                 {
                     // get the vertex count and primitive type
@@ -229,14 +228,13 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                     // PMM - added double damage shell
                     if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
                     {
-                        do
+                        for (i = 0; i < count; ++i)
                         {
-                            index_xyz = order[2];
+                            *indices++ = order[2];
                             order += 3;
+                        };
 
-                            //qglVertex3fv(s_lerped[index_xyz]);
-
-                        } while (--count);
+                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, 0, 0);
                     }
                     else
                     {
@@ -248,9 +246,10 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
                             order += 3;
                         }
 
-                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first_index, 0, 0);
-                        first_index += count;
+                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, 0, 0);
                     }
+
+                    first += count;
                 }
             }
             vkUnmapMemory(vk_context.device, mod->index_buffer.memory);
