@@ -162,7 +162,7 @@ boundaries so that turbulent and sky warps
 can be done reasonably.
 ================
 */
-void VK_SubdivideSurface (msurface_t *fa)
+void Vk_SubdivideSurface (msurface_t *fa)
 {
 	vec3_t		verts[64];
 	int			numverts;
