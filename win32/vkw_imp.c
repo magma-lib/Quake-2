@@ -443,12 +443,12 @@ void VKimp_EndFrame(void)
     const VkPipelineStageFlags wait_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo submit_info;
     VkPresentInfoKHR present_info;
+    VkResult res;
 
     vkCmdEndRenderPass(vk_context.cmdbuffer);
-    if (vkEndCommandBuffer(vk_context.cmdbuffer) != VK_SUCCESS)
-    {
-        ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - couldn't end command buffer\n");
-    }
+    res = vkEndCommandBuffer(vk_context.cmdbuffer);
+    if (res != VK_SUCCESS)
+        ri.Sys_Error(ERR_FATAL, "VKimp_EndFrame() - couldn't end command buffer\n");
 
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.pNext = NULL;
@@ -469,15 +469,12 @@ void VKimp_EndFrame(void)
     present_info.pImageIndices = &vkw_state.image_index;
     present_info.pResults = NULL;
 
-    if (vkQueueSubmit(vk_context.queue, 1, &submit_info, vk_context.fences[vkw_state.image_index]) != VK_SUCCESS)
-    {
-        ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - failed to submit command buffer\n");
-    }
-
-    if (vkQueuePresentKHR(vk_context.queue, &present_info) != VK_SUCCESS)
-    {
-        ri.Con_Printf(PRINT_ALL, "VKimp_EndFrame() - swap chain present failed\n");
-    }
+    res = vkQueueSubmit(vk_context.queue, 1, &submit_info, vk_context.fences[vkw_state.image_index]);
+    if (res != VK_SUCCESS)
+        ri.Sys_Error(ERR_FATAL, "VKimp_EndFrame() - failed to submit command buffer\n");
+    res = vkQueuePresentKHR(vk_context.queue, &present_info);
+    if (res != VK_SUCCESS)
+        ri.Sys_Error(ERR_FATAL, "VKimp_EndFrame() - swap chain present failed\n");
 
     vkDeviceWaitIdle(vk_context.device);
 }
