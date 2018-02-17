@@ -224,7 +224,7 @@ void R_DrawEntitiesOnList(void)
     if (!r_drawentities->value)
         return;
 
-    current_mvp_offset = 0;
+    //current_mvp_offset = 0;
 
     // draw non-transparent first
     for (i = 0; i<r_newrefdef.num_entities; i++)
@@ -529,7 +529,6 @@ void R_SetModelViewProjection()
     float    viewangles[3], rad90;
     XMMATRIX z_up[2], rx, ry, rz, tr;
     XMMATRIX proj, view;
-    void     *data;
 
     fov_y = XMConvertToRadians(r_newrefdef.fov_y);
     screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
@@ -559,11 +558,15 @@ void R_SetModelViewProjection()
 
     r_viewproj = XMMatrixMultiply(&view, &proj);
 
-    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &data) == VK_SUCCESS)
+    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &vk_context.per_object.memptr) == VK_SUCCESS) // TODO: per-frame?
     {
-        memcpy(data, &r_viewproj, sizeof(XMMATRIX));
+        memcpy(vk_context.per_object.memptr, &r_viewproj, sizeof(XMMATRIX));
         vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
     }
+
+    vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 
+        0, 1, &vk_context.dset, 1, &current_mvp_offset);
+    current_mvp_offset += sizeof(XMMATRIX);
 }
 
 /*
