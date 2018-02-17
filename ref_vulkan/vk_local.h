@@ -349,6 +349,14 @@ typedef struct
 
 typedef struct
 {
+    VkPipelineShaderStageCreateInfo tnl_alias_v;
+    VkPipelineShaderStageCreateInfo tnl_alias_f;
+    VkPipelineShaderStageCreateInfo tnl_world_v;
+    VkPipelineShaderStageCreateInfo tnl_world_f;
+} vkshaders_t;
+
+typedef struct
+{
     int         renderer;
 } vkconfig_t;
 
@@ -375,6 +383,7 @@ typedef struct
 } vkstate_t;
 
 extern vkcontext_t vk_context;
+extern vkshaders_t vk_shaders;
 extern vkconfig_t  vk_config;
 extern vkstate_t   vk_state;
 

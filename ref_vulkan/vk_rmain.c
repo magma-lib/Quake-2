@@ -807,6 +807,20 @@ qboolean R_SetMode(void)
 
 /*
 ===============
+R_LoadShaders
+===============
+*/
+static void R_LoadShaders()
+{
+    Vk_LoadShader("tnl_alias_v.o", "main", true, &vk_shaders.tnl_alias_v);
+    Vk_LoadShader("tnl_alias_f.o", "main", false, &vk_shaders.tnl_alias_f);
+    
+    Vk_LoadShader("tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
+    Vk_LoadShader("tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
+}
+
+/*
+===============
 R_InitContextObjects
 ===============
 */
@@ -1019,6 +1033,7 @@ qboolean R_Init(void *hinstance, void *hWnd)
     }
 
     // initialize common Vulkan objects
+    R_LoadShaders();
     R_InitContextObjects();
 
     ri.Vid_MenuInit();
