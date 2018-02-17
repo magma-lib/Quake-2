@@ -68,6 +68,9 @@
     <CustomBuild Include="shaders\tnl_alias_f.frag">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="shaders\tnl_world_f.frag">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\q_shared.c">
