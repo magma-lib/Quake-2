@@ -221,8 +221,6 @@ void R_DrawEntitiesOnList(void)
     if (!r_drawentities->value)
         return;
 
-    //current_mvp_offset = 0;
-
     // draw non-transparent first
     for (i = 0; i<r_newrefdef.num_entities; i++)
     {
