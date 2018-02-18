@@ -11,7 +11,7 @@ out gl_PerVertex
     vec4 gl_Position;
 };
 
-layout(binding = 0) uniform perspective_transform
+layout(binding = 1) uniform per_object
 {
     mat4 modelviewproj;
 };

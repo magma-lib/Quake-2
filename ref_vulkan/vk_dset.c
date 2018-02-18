@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "vk_local.h"
 
-void Vk_DSetUpdateUniformBuffer(const vkbuffer_t *buffer, uint32_t binding, VkDescriptorSetLayoutBinding layout_binding)
+void Vk_DSetUpdateUniformBuffer(VkDescriptorSet dset, const vkbuffer_t *buffer, uint32_t binding, const VkDescriptorSetLayoutBinding *layout_binding)
 {
     VkDescriptorBufferInfo uniform_buffer_info;
     VkWriteDescriptorSet write_dset;
@@ -30,11 +30,11 @@ void Vk_DSetUpdateUniformBuffer(const vkbuffer_t *buffer, uint32_t binding, VkDe
 
     write_dset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     write_dset.pNext = NULL;
-    write_dset.dstSet = vk_context.dset;
+    write_dset.dstSet = dset;
     write_dset.dstBinding = binding;
     write_dset.dstArrayElement = 0;
-    write_dset.descriptorCount = layout_binding.descriptorCount;
-    write_dset.descriptorType = layout_binding.descriptorType;
+    write_dset.descriptorCount = layout_binding->descriptorCount;
+    write_dset.descriptorType = layout_binding->descriptorType;
     write_dset.pImageInfo = NULL;
     write_dset.pBufferInfo = &uniform_buffer_info;
     write_dset.pTexelBufferView = NULL;
@@ -44,14 +44,18 @@ void Vk_DSetUpdateUniformBuffer(const vkbuffer_t *buffer, uint32_t binding, VkDe
 
 qboolean Vk_DSetSetupLayout()
 {
-    VkDescriptorPoolSize pool_sizes[1];
-    VkDescriptorSetLayoutBinding bindings[1];
+    VkDescriptorPoolSize pool_sizes[2];
+    VkDescriptorSetLayoutBinding bindings[2];
     VkDescriptorPoolCreateInfo pool_info;
     VkDescriptorSetLayoutCreateInfo layout_info;
     VkDescriptorSetAllocateInfo alloc_info;
     
-    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    // per-frame worldviewproj transform
+    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount = 1;
+    // per-object transform
+    pool_sizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    pool_sizes[1].descriptorCount = 1;
 
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info.pNext = NULL;
@@ -67,10 +71,16 @@ qboolean Vk_DSetSetupLayout()
     }
 
     bindings[0].binding = 0;
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     bindings[0].descriptorCount = 1;
     bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     bindings[0].pImmutableSamplers = NULL;
+
+    bindings[1].binding = 1;
+    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    bindings[1].descriptorCount = 1;
+    bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    bindings[1].pImmutableSamplers = NULL;
 
     layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layout_info.pNext = NULL;
@@ -96,12 +106,44 @@ qboolean Vk_DSetSetupLayout()
         return false;
     }
 
-    if (!Vk_CreateUniformBuffer(sizeof(float) * 16 * MAX_ENTITIES, &vk_context.per_object))
+    if (!Vk_CreateUniformBuffer(sizeof(XMMATRIX), &vk_transforms.perframe))
     {
         ri.Con_Printf(PRINT_ALL, "Couldn't create per-object uniform buffer\n");
         return false;
     }
 
-    Vk_DSetUpdateUniformBuffer(&vk_context.per_object, 0, bindings[0]);
+    if (!Vk_CreateUniformBuffer(sizeof(vk_transforms.entities), &vk_transforms.perobject))
+    {
+        ri.Con_Printf(PRINT_ALL, "Couldn't create per-object uniform buffer\n");
+        return false;
+    }
+
+    Vk_DSetUpdateUniformBuffer(vk_context.dset, &vk_transforms.perframe, 0, &bindings[0]);
+    Vk_DSetUpdateUniformBuffer(vk_context.dset, &vk_transforms.perobject, 1, &bindings[1]);
+
     return true;
+}
+
+void Vk_DSetDestroyLayout()
+{
+    Vk_DestroyBuffer(&vk_transforms.perframe);
+    Vk_DestroyBuffer(&vk_transforms.perobject);
+
+    if (vk_context.dset)
+    {
+        vkFreeDescriptorSets(vk_context.device, vk_context.dpool, 1, &vk_context.dset);
+        vk_context.dset = VK_NULL_HANDLE;
+    }
+
+    if (vk_context.dset_layout)
+    {
+        vkDestroyDescriptorSetLayout(vk_context.device, vk_context.dset_layout, NULL);
+        vk_context.dset_layout = VK_NULL_HANDLE;
+    }
+
+    if (vk_context.dpool)
+    {
+        vkDestroyDescriptorPool(vk_context.device, vk_context.dpool, NULL);
+        vk_context.dpool = VK_NULL_HANDLE;
+    }
 }

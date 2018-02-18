@@ -29,6 +29,7 @@ vkcontext_t vk_context;
 vkshaders_t vk_shaders;
 vkconfig_t  vk_config;
 vkstate_t   vk_state;
+vkmatrices_t vk_transforms;
 
 model_t		*r_worldmodel;
 
@@ -42,7 +43,6 @@ image_t		*r_particletexture;	// little dot for particles
 
 entity_t	*currententity;
 model_t		*currentmodel;
-uint32_t    current_mvp_offset;
 
 cplane_t	frustum[4];
 
@@ -152,7 +152,7 @@ void R_RotateForEntity(entity_t *e)
     float       angles[3];
     XMMATRIX    rx, ry, rz, tr;
     XMMATRIX    world, worldviewproj;
-    void        *data;
+    uint32_t    dynamicoffset;
     
     angles[0] = XMConvertToRadians(e->angles[0]);
     angles[1] = XMConvertToRadians(e->angles[1]);
@@ -168,18 +168,15 @@ void R_RotateForEntity(entity_t *e)
     world = XMMatrixMultiply(&world, &tr);
     worldviewproj = XMMatrixMultiply(&world, &r_viewproj);
 
-    // TODO: write to tmp buffer, copy to uniform buffer before command buffer execution
-    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, current_mvp_offset, sizeof(XMMATRIX), 0, &data) == VK_SUCCESS)
-    {
-        memcpy(data, &worldviewproj, sizeof(XMMATRIX));
-        vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
-    }
+    // write to array for now, buffer will be updated before command buffer execution
+    vk_transforms.entities[vk_transforms.offset] = worldviewproj;
 
+    dynamicoffset = vk_transforms.offset * sizeof(XMMATRIX);
     vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout,
         0, 1, &vk_context.dset,
-        1, &current_mvp_offset); // fetch transform from specified offset during cmdbuffer execution
+        1, &dynamicoffset); // fetch transform from specified offset during cmdbuffer execution
 
-    current_mvp_offset += sizeof(XMMATRIX);
+    ++vk_transforms.offset;
 }
 
 /*
@@ -549,7 +546,6 @@ void R_SetModelViewProjection()
     ry = XMMatrixRotationY(-viewangles[0]);
     rz = XMMatrixRotationZ(-viewangles[1]);
     tr = XMMatrixTranslation(-r_newrefdef.vieworg[0], -r_newrefdef.vieworg[1], -r_newrefdef.vieworg[2]);
-    //tr = XMMatrixTranslation(0.f, 0.f, r_newrefdef.vieworg[2]);
 
     view = XMMatrixMultiply(&tr, &rz);
     view = XMMatrixMultiply(&view, &ry);
@@ -559,15 +555,18 @@ void R_SetModelViewProjection()
 
     r_viewproj = XMMatrixMultiply(&view, &proj);
 
-    if (vkMapMemory(vk_context.device, vk_context.per_object.memory, 0, VK_WHOLE_SIZE, 0, &vk_context.per_object.memptr) == VK_SUCCESS) // TODO: per-frame?
+    if (vkMapMemory(vk_context.device, vk_transforms.perframe.memory, 0, VK_WHOLE_SIZE, 0, &vk_transforms.perframe.memptr) == VK_SUCCESS)
     {
-        memcpy(vk_context.per_object.memptr, &r_viewproj, sizeof(XMMATRIX));
-        vkUnmapMemory(vk_context.device, vk_context.per_object.memory);
+        memcpy(vk_transforms.perframe.memptr, &r_viewproj, sizeof(XMMATRIX));
+        vkUnmapMemory(vk_context.device, vk_transforms.perframe.memory);
     }
 
+    vk_transforms.offset = 0;
     vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 
-        0, 1, &vk_context.dset, 1, &current_mvp_offset);
-    current_mvp_offset += sizeof(XMMATRIX);
+        0, 1, &vk_context.dset, 1, &vk_transforms.offset);
+
+    // clear entity transforms
+    memset(vk_transforms.entities, 0, sizeof(vk_transforms.entities));
 }
 
 /*
@@ -583,6 +582,23 @@ void R_BindGraphicsPipeline(void)
 void R_Flash(void)
 {
     R_PolyBlend();
+}
+
+/*
+=============
+R_PostUpdate
+=============
+*/
+void R_PostUpdate(void)
+{
+    VkDeviceSize size;
+
+    size = vk_transforms.offset * sizeof(XMMATRIX);
+    if (vkMapMemory(vk_context.device, vk_transforms.perobject.memory, 0, size, 0, &vk_transforms.perobject.memptr) == VK_SUCCESS)
+    {
+        memcpy(vk_transforms.perobject.memptr, vk_transforms.entities, size);
+        vkUnmapMemory(vk_context.device, vk_transforms.perobject.memory);
+    }
 }
 
 /*
@@ -607,8 +623,6 @@ void R_RenderView(refdef_t *fd)
         c_brush_polys = 0;
         c_alias_polys = 0;
     }
-
-    current_mvp_offset = 0;
 
     R_PushDlights();
 
@@ -637,6 +651,8 @@ void R_RenderView(refdef_t *fd)
     R_DrawAlphaSurfaces();
 
     R_Flash();
+
+    R_PostUpdate();
 
     if (r_speeds->value)
     {
@@ -1055,6 +1071,7 @@ R_Shutdown
 */
 void R_Shutdown(void)
 {
+    Vk_DSetDestroyLayout();
     VK_DestroyFramebuffer();
     VK_DestroyRenderPass();
 

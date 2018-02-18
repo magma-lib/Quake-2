@@ -339,9 +339,6 @@ typedef struct
     VkDescriptorSetLayout   dset_layout;
     VkDescriptorSet     dset;
 
-    vkbuffer_t          per_frame;
-    vkbuffer_t          per_object;
-
     VkPipelineLayout    pipeline_layout;
     VkPipeline          pipeline_world;
     VkPipeline          pipeline_tri_strip;
@@ -349,6 +346,14 @@ typedef struct
 
     VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;
+
+typedef struct
+{
+    vkbuffer_t          perframe;
+    vkbuffer_t          perobject;
+    XMMATRIX            entities[MAX_ENTITIES];
+    uint32_t            offset;
+} vkmatrices_t;
 
 typedef struct
 {
@@ -389,6 +394,7 @@ extern vkcontext_t vk_context;
 extern vkshaders_t vk_shaders;
 extern vkconfig_t  vk_config;
 extern vkstate_t   vk_state;
+extern vkmatrices_t vk_transforms;
 
 /*
 ====================================================================
@@ -408,6 +414,7 @@ void VK_DestroyFramebuffer(void);
 qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean vertex, VkPipelineShaderStageCreateInfo *shader);
 void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader);
 qboolean Vk_DSetSetupLayout();
+void Vk_DSetDestroyLayout();
 VkPipeline Vk_CreateDefaultPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
     VkPrimitiveTopology topology);
 VkPipeline Vk_CreateWorldPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
