@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------------
-// SIMD C++ Math library
+// DirectXMath -- SIMD C++ Math library
 //
 // THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 // ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
@@ -8,11 +8,12 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Copyright (C) 2018 Victor Coda.
+//
+// http://go.microsoft.com/fwlink/?LinkID=615560
 //-------------------------------------------------------------------------------------
+#include "dxmath.h"
 
-#pragma once
-
-inline XMMATRIX XM_CALLCONV XMMatrixMultiply
+XMMATRIX XM_CALLCONV XMMatrixMultiply
 (
     FXMMATRIX *M1, 
     FXMMATRIX *M2
@@ -107,7 +108,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixMultiply
     return mResult;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixMultiplyTranspose
+XMMATRIX XM_CALLCONV XMMatrixMultiplyTranspose
 (
     FXMMATRIX *M1, 
     FXMMATRIX *M2
@@ -220,7 +221,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixMultiplyTranspose
     return mResult;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixTranspose
+XMMATRIX XM_CALLCONV XMMatrixTranspose
 (
     FXMMATRIX *M
 )
@@ -246,8 +247,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixTranspose
     return mResult;
 }
 
-// Return the inverse and the determinant of a 4x4 matrix
-inline XMMATRIX XM_CALLCONV XMMatrixInverse
+XMMATRIX XM_CALLCONV XMMatrixInverse
 (
     XMVECTOR *pDeterminant, 
     FXMMATRIX *M
@@ -369,7 +369,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixInverse
     return mResult;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixIdentity()
+XMMATRIX XM_CALLCONV XMMatrixIdentity()
 {
     XMMATRIX M;
     M.r[0] = g_XMIdentityR0.v;
@@ -379,7 +379,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixIdentity()
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixSet
+XMMATRIX XM_CALLCONV XMMatrixSet
 (
     float m00, float m01, float m02, float m03,
     float m10, float m11, float m12, float m13,
@@ -395,7 +395,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixSet
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixTranslation
+XMMATRIX XM_CALLCONV XMMatrixTranslation
 (
     float OffsetX, 
     float OffsetY, 
@@ -410,7 +410,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixTranslation
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixTranslationFromVector
+XMMATRIX XM_CALLCONV XMMatrixTranslationFromVector
 (
     FXMVECTOR Offset
 )
@@ -423,7 +423,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixTranslationFromVector
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixScaling
+XMMATRIX XM_CALLCONV XMMatrixScaling
 (
     float ScaleX, 
     float ScaleY, 
@@ -438,7 +438,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixScaling
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixScalingFromVector
+XMMATRIX XM_CALLCONV XMMatrixScalingFromVector
 (
     FXMVECTOR Scale
 )
@@ -451,7 +451,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixScalingFromVector
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixRotationX
+XMMATRIX XM_CALLCONV XMMatrixRotationX
 (
     float Angle
 )
@@ -459,8 +459,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationX
     float    SinAngle;
     float    CosAngle;
 
-    SinAngle = sin(Angle);
-    CosAngle = cos(Angle);
+    SinAngle = sinf(Angle);
+    CosAngle = cosf(Angle);
 
     XMVECTOR vSin = _mm_set_ss(SinAngle);
     XMVECTOR vCos = _mm_set_ss(CosAngle);
@@ -478,7 +478,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationX
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixRotationY
+XMMATRIX XM_CALLCONV XMMatrixRotationY
 (
     float Angle
 )
@@ -486,8 +486,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationY
     float    SinAngle;
     float    CosAngle;
     
-    SinAngle = sin(Angle);
-    CosAngle = cos(Angle);
+    SinAngle = sinf(Angle);
+    CosAngle = cosf(Angle);
 
     XMVECTOR vSin = _mm_set_ss(SinAngle);
     XMVECTOR vCos = _mm_set_ss(CosAngle);
@@ -505,7 +505,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationY
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixRotationZ
+XMMATRIX XM_CALLCONV XMMatrixRotationZ
 (
     float Angle
 )
@@ -513,8 +513,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationZ
     float    SinAngle;
     float    CosAngle;
     
-    SinAngle = sin(Angle);
-    CosAngle = cos(Angle);
+    SinAngle = sinf(Angle);
+    CosAngle = cosf(Angle);
 
     XMVECTOR vSin = _mm_set_ss(SinAngle);
     XMVECTOR vCos = _mm_set_ss(CosAngle);
@@ -532,7 +532,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationZ
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixRotationNormal
+XMMATRIX XM_CALLCONV XMMatrixRotationNormal
 (
     FXMVECTOR NormalAxis, 
     float     Angle
@@ -541,8 +541,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationNormal
     float    SinAngle;
     float    CosAngle;
     
-    SinAngle = sin(Angle);
-    CosAngle = cos(Angle);
+    SinAngle = sinf(Angle);
+    CosAngle = cosf(Angle);
 
     XMVECTOR C2 = _mm_set_ps1(1.0f - CosAngle);
     XMVECTOR C1 = _mm_set_ps1(CosAngle);
@@ -585,7 +585,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationNormal
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixRotationAxis
+XMMATRIX XM_CALLCONV XMMatrixRotationAxis
 (
     FXMVECTOR Axis, 
     float     Angle
@@ -595,7 +595,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixRotationAxis
     return XMMatrixRotationNormal(Normal, Angle);
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixLookToLH
+XMMATRIX XM_CALLCONV XMMatrixLookToLH
 (
     FXMVECTOR EyePosition,
     FXMVECTOR EyeDirection,
@@ -626,7 +626,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixLookToLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixLookToRH
+XMMATRIX XM_CALLCONV XMMatrixLookToRH
 (
     FXMVECTOR EyePosition, 
     FXMVECTOR EyeDirection, 
@@ -637,7 +637,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixLookToRH
     return XMMatrixLookToLH(EyePosition, NegEyeDirection, UpDirection);
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixLookAtLH
+XMMATRIX XM_CALLCONV XMMatrixLookAtLH
 (
     FXMVECTOR EyePosition,
     FXMVECTOR FocusPosition,
@@ -648,7 +648,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixLookAtLH
     return XMMatrixLookToLH(EyePosition, EyeDirection, UpDirection);
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixLookAtRH
+XMMATRIX XM_CALLCONV XMMatrixLookAtRH
 (
     FXMVECTOR EyePosition,
     FXMVECTOR FocusPosition,
@@ -664,7 +664,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixLookAtRH
 #pragma prefast(disable:28931, "PREfast noise: Esp:1266")
 #endif
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveLH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveLH
 (
     float ViewWidth, 
     float ViewHeight, 
@@ -705,7 +705,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveRH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveRH
 (
     float ViewWidth, 
     float ViewHeight, 
@@ -746,7 +746,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveRH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovLH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovLH
 (
     float FovAngleY, 
     float AspectRatio, 
@@ -757,8 +757,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovLH
     float    SinFov;
     float    CosFov;
     
-    SinFov = sin(0.5f * FovAngleY);
-    CosFov = cos(0.5f * FovAngleY);
+    SinFov = sinf(0.5f * FovAngleY);
+    CosFov = cosf(0.5f * FovAngleY);
 
     float fRange = FarZ / (FarZ-NearZ);
     // Note: This is recorded on the stack
@@ -793,7 +793,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovRH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovRH
 (
     float FovAngleY, 
     float AspectRatio, 
@@ -804,8 +804,8 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovRH
     float    SinFov;
     float    CosFov;
     
-    SinFov = sin(0.5f * FovAngleY);
-    CosFov = cos(0.5f * FovAngleY);
+    SinFov = sinf(0.5f * FovAngleY);
+    CosFov = cosf(0.5f * FovAngleY);
     float fRange = FarZ / (NearZ-FarZ);
     // Note: This is recorded on the stack
     float Height = CosFov / SinFov;
@@ -839,7 +839,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovRH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterLH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterLH
 (
     float ViewLeft, 
     float ViewRight, 
@@ -883,7 +883,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterRH
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterRH
 (
     float ViewLeft, 
     float ViewRight, 
@@ -927,7 +927,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterRH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixOrthographicLH
+XMMATRIX XM_CALLCONV XMMatrixOrthographicLH
 (
     float ViewWidth, 
     float ViewHeight, 
@@ -967,7 +967,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixOrthographicLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixOrthographicRH
+XMMATRIX XM_CALLCONV XMMatrixOrthographicRH
 (
     float ViewWidth, 
     float ViewHeight, 
@@ -1007,7 +1007,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixOrthographicRH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterLH
+XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterLH
 (
     float ViewLeft, 
     float ViewRight, 
@@ -1057,7 +1057,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterLH
     return M;
 }
 
-inline XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterRH
+XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterRH
 (
     float ViewLeft, 
     float ViewRight, 

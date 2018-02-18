@@ -12,11 +12,6 @@
 
 #pragma once
 
-#define _XM_SSE_INTRINSICS_
-#define _XM_SSE3_INTRINSICS_
-#define _XM_SSE4_INTRINSICS_
-#define _XM_AVX_INTRINSICS_
-
 #if defined(_MSC_VER) && !defined(_M_ARM) && !defined(_M_ARM64) && !defined(_M_HYBRID_X86_ARM64) && (!_MANAGED) && (!_M_CEE) && (!defined(_M_IX86_FP) || (_M_IX86_FP > 1)) && !defined(_XM_NO_INTRINSICS_) && !defined(_XM_VECTORCALL_)
 #if ((_MSC_FULL_VER >= 170065501) && (_MSC_VER < 1800)) || (_MSC_FULL_VER >= 180020418)
 #define _XM_VECTORCALL_ 1
@@ -39,37 +34,17 @@
 #include <malloc.h>
 #pragma warning(pop)
 
-#ifndef _XM_NO_INTRINSICS_
 #pragma warning(push)
 #pragma warning(disable : 4987)
 // C4987: Off by default noise
 #include <intrin.h>
 #pragma warning(pop)
 
-#ifdef _XM_SSE_INTRINSICS_
 #include <xmmintrin.h>
 #include <emmintrin.h>
-
-#ifdef _XM_SSE3_INTRINSICS_
 #include <pmmintrin.h>
-#endif
-
-#ifdef _XM_SSE4_INTRINSICS_
 #include <smmintrin.h>
-#endif
-
-#ifdef _XM_AVX_INTRINSICS_
 #include <immintrin.h>
-#endif
-
-#elif defined(_XM_ARM_NEON_INTRINSICS_)
-#if defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-#include <arm64_neon.h>
-#else
-#include <arm_neon.h>
-#endif
-#endif
-#endif // !_XM_NO_INTRINSICS_
 
 #include <assert.h>
 
@@ -85,8 +60,6 @@
 *
 ****************************************************************************/
 
-#if defined(_XM_SSE_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
-
 #if defined(_XM_NO_MOVNT_)
 #define XM_STREAM_PS( p, a ) _mm_store_ps( p, a )
 #define XM_SFENCE()
@@ -100,8 +73,6 @@
 #else
 #define XM_PERMUTE_PS( v, c ) _mm_shuffle_ps( v, v, c )
 #endif
-
-#endif // _XM_SSE_INTRINSICS_ && !_XM_NO_INTRINSICS_
 
 typedef int bool;
 
@@ -344,8 +315,61 @@ XMGLOBALCONST XMVECTORF32 g_ShortMin = { { { -32767.0f, -32767.0f, -32767.0f, -3
 XMGLOBALCONST XMVECTORF32 g_ShortMax = { { { 32767.0f, 32767.0f, 32767.0f, 32767.0f } } };
 XMGLOBALCONST XMVECTORF32 g_UShortMax = { { { 65535.0f, 65535.0f, 65535.0f, 65535.0f } } };
 
-float XMConvertToRadians(float fDegrees) { return fDegrees * (XM_PI / 180.0f); }
-float XMConvertToDegrees(float fRadians) { return fRadians * (180.0f / XM_PI); }
+#define XMConvertToRadians(Degrees) ((Degrees) * (XM_PI / 180.0f))
+#define XMConvertToDegrees(Radians) ((Radians) * (180.0f / XM_PI))
 
-#include "dxmvector.inl"
-#include "dxmmatrix.inl"
+XMVECTOR XM_CALLCONV XMVectorZero();
+XMVECTOR XM_CALLCONV XMVectorSet(float x, float y, float z, float w);
+XMVECTOR XM_CALLCONV XMVectorReplicate(float Value);
+float XM_CALLCONV XMVectorGetX(FXMVECTOR V);
+float XM_CALLCONV XMVectorGetY(FXMVECTOR V);
+float XM_CALLCONV XMVectorGetZ(FXMVECTOR V);
+float XM_CALLCONV XMVectorGetW(FXMVECTOR V);
+XMVECTOR XM_CALLCONV XMVectorSetX(FXMVECTOR V, float x);
+XMVECTOR XM_CALLCONV XMVectorSetY(FXMVECTOR V, float y);
+XMVECTOR XM_CALLCONV XMVectorSetZ(FXMVECTOR V, float z);
+XMVECTOR XM_CALLCONV XMVectorSetW(FXMVECTOR V, float w);
+XMVECTOR XM_CALLCONV XMVectorSelect(FXMVECTOR V1, FXMVECTOR V2, FXMVECTOR Control);
+XMVECTOR XM_CALLCONV XMVectorNegate(FXMVECTOR V);
+XMVECTOR XM_CALLCONV XMVectorAdd(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVectorSubtract(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVectorMultiply(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVectorMultiplyAdd(FXMVECTOR V1, FXMVECTOR V2, FXMVECTOR V3);
+XMVECTOR XM_CALLCONV XMVectorDivide(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVectorScale(FXMVECTOR V, float ScaleFactor);
+XMVECTOR XM_CALLCONV XMVector3Dot(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVector3Cross(FXMVECTOR V1, FXMVECTOR V2);
+XMVECTOR XM_CALLCONV XMVector3Length(FXMVECTOR V);
+XMVECTOR XM_CALLCONV XMVector3Normalize(FXMVECTOR V);
+XMVECTOR XM_CALLCONV XMVector4Dot(FXMVECTOR V1, FXMVECTOR V2);
+
+XMMATRIX XM_CALLCONV XMMatrixMultiply(FXMMATRIX *M1, FXMMATRIX *M2);
+XMMATRIX XM_CALLCONV XMMatrixMultiplyTranspose(FXMMATRIX *M1, FXMMATRIX *M2);
+XMMATRIX XM_CALLCONV XMMatrixTranspose(FXMMATRIX *M);
+XMMATRIX XM_CALLCONV XMMatrixInverse(XMVECTOR *pDeterminant, FXMMATRIX *M);
+XMMATRIX XM_CALLCONV XMMatrixIdentity();
+XMMATRIX XM_CALLCONV XMMatrixSet(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33);
+XMMATRIX XM_CALLCONV XMMatrixTranslation(float OffsetX, float OffsetY, float OffsetZ);
+XMMATRIX XM_CALLCONV XMMatrixTranslationFromVector(FXMVECTOR Offset);
+XMMATRIX XM_CALLCONV XMMatrixScaling(float ScaleX, float ScaleY, float ScaleZ);
+XMMATRIX XM_CALLCONV XMMatrixScalingFromVector(FXMVECTOR Scale);
+XMMATRIX XM_CALLCONV XMMatrixRotationX(float Angle);
+XMMATRIX XM_CALLCONV XMMatrixRotationY(float Angle);
+XMMATRIX XM_CALLCONV XMMatrixRotationZ(float Angle);
+XMMATRIX XM_CALLCONV XMMatrixRotationNormal(FXMVECTOR NormalAxis, float Angle);
+XMMATRIX XM_CALLCONV XMMatrixRotationAxis(FXMVECTOR Axis, float Angle);
+XMMATRIX XM_CALLCONV XMMatrixLookToLH(FXMVECTOR EyePosition, FXMVECTOR EyeDirection, FXMVECTOR UpDirection);
+XMMATRIX XM_CALLCONV XMMatrixLookToRH(FXMVECTOR EyePosition, FXMVECTOR EyeDirection, FXMVECTOR UpDirection);
+XMMATRIX XM_CALLCONV XMMatrixLookAtLH(FXMVECTOR EyePosition, FXMVECTOR FocusPosition, FXMVECTOR UpDirection);
+XMMATRIX XM_CALLCONV XMMatrixLookAtRH(FXMVECTOR EyePosition, FXMVECTOR FocusPosition, FXMVECTOR UpDirection);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveLH(float ViewWidth, float ViewHeight, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveRH(float ViewWidth, float ViewHeight, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovLH(float FovAngleY, float AspectRatio, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveFovRH(float FovAngleY, float AspectRatio, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterLH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixPerspectiveOffCenterRH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixOrthographicLH(float ViewWidth, float ViewHeight, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixOrthographicRH(float ViewWidth, float ViewHeight, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterLH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
+XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterRH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
+

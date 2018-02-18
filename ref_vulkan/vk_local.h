@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "../client/ref.h"
 
+#include "dxmath.h"
+
 #define	REF_VERSION	"VK 0.01"
 
 // up / down
