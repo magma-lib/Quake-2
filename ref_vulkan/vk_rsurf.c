@@ -1010,6 +1010,9 @@ R_DrawWorld
 void R_DrawWorld (void)
 {
 	entity_t	ent;
+	vkbuffer_t	*vb;
+	VkResult	res;
+	VkDeviceSize offset = 0;
 
 	if (!r_drawworld->value)
 		return;
@@ -1018,6 +1021,7 @@ void R_DrawWorld (void)
 		return;
 
 	currentmodel = r_worldmodel;
+	vb = currentmodel->vertexbuffer;
 
 	VectorCopy (r_newrefdef.vieworg, modelorg);
 
@@ -1032,20 +1036,15 @@ void R_DrawWorld (void)
 	memset (vk_lms.lightmap_surfaces, 0, sizeof(vk_lms.lightmap_surfaces));
 	R_ClearSkyBox ();
 
-    VkBuffer buffers[1];
-    VkDeviceSize offsets[1];
-
-    buffers[0] = r_worldmodel->vertexbuffer.buffer;
-    offsets[0] = 0;
-
-    vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
-    uint32_t dynoffset = 0;
-    vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 0, 1, &vk_context.dset, 1, &dynoffset);
-    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, buffers, offsets);
-
-    if (vkMapMemory(vk_context.device, r_worldmodel->vertexbuffer.memory, 0, 1000 * 3 * sizeof(float) * VERTEXSIZE, 0, &r_worldmodel->vertexbuffer.memptr) != VK_SUCCESS)
+    res = vkMapMemory(vk_context.device, vb->memory, 
+		vb->firstvertex * sizeof(vkpolyvertex_t),	// offset
+		VK_WHOLE_SIZE,								// rest of buffer
+		0, &vb->memptr);
+	if (res != VK_SUCCESS)
         return;
-    r_worldmodel->vertexbuffer.offset = 0;
+
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &r_worldmodel->vertexbuffer->buffer, &offset);
 
     R_RecursiveWorldNode(r_worldmodel->nodes);
 
@@ -1060,7 +1059,8 @@ void R_DrawWorld (void)
 
     R_DrawTriangleOutlines();
 
-    vkUnmapMemory(vk_context.device, r_worldmodel->vertexbuffer.memory);
+    vkUnmapMemory(vk_context.device, vb->memory);
+	vb->memptr = NULL;
 }
 
 
