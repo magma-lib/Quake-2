@@ -47,6 +47,8 @@ static qboolean Vk_CreateBuffer(VkBufferUsageFlags usage, VkDeviceSize size, vkb
             vkBindBufferMemory(vk_context.device, buffer->buffer, buffer->memory, 0);
             buffer->size = size;
             buffer->usage = usage;
+			buffer->memptr = NULL;
+			buffer->firstvertex = 0;
             return true;
         }
         else

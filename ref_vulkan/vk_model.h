@@ -173,7 +173,7 @@ typedef struct
 	VkDeviceSize		size;
 	VkBufferUsageFlags	usage;
 	void				*memptr;
-	uint32_t			offset;
+	uint32_t			firstvertex;
 } vkbuffer_t;
 
 //
@@ -222,7 +222,7 @@ typedef struct model_s
 
 	int			numvertexes;
 	mvertex_t	*vertexes;
-	vkbuffer_t	vertexbuffer;	// brush vertex data
+	vkbuffer_t	*vertexbuffer;	// brush vertex data
 
 	int			numedges;
 	medge_t		*edges;

@@ -193,7 +193,7 @@ void DrawVkPoly (vkpoly_t *p, vkbuffer_t *vb)
     fv = (vkpolyvertex_t *)p->verts; // first
     mv = fv + 1; // middle
     lv = fv + 2; // last
-    v = ((vkpolyvertex_t *)vb->memptr) + vb->offset;
+    v = (vkpolyvertex_t *)vb->memptr;
     
     for (i = 0, n = p->numverts - 2; i<n; ++i, ++lv)
     {
@@ -204,8 +204,9 @@ void DrawVkPoly (vkpoly_t *p, vkbuffer_t *vb)
     }
 
     numverts = (p->numverts - 2) * 3;
-    vkCmdDraw(vk_context.cmdbuffer, numverts, 1, vb->offset, 0);
-    vb->offset += numverts;
+    vkCmdDraw(vk_context.cmdbuffer, numverts, 1, vb->firstvertex, 0);
+	vb->memptr = v;
+    vb->firstvertex += numverts;
 }
 
 //============
@@ -232,7 +233,7 @@ void DrawVkFlowingPoly (msurface_t *fa, vkbuffer_t *vb)
     fv = (vkpolyvertex_t *)p->verts; // first
     mv = fv + 1; // middle
     lv = fv + 2; // last
-    v = ((vkpolyvertex_t *)vb->memptr) + vb->offset;
+    v = (vkpolyvertex_t *)vb->memptr;
 
     for (i = 0, n = p->numverts - 2; i<n; ++i, ++lv)
     {
@@ -243,8 +244,9 @@ void DrawVkFlowingPoly (msurface_t *fa, vkbuffer_t *vb)
     }
 
     numverts = (p->numverts - 2) * 3;
-    vkCmdDraw(vk_context.cmdbuffer, numverts, 1, vb->offset, 0);
-    vb->offset += numverts;
+    vkCmdDraw(vk_context.cmdbuffer, numverts, 1, vb->firstvertex, 0);
+    vb->memptr = v;
+    vb->firstvertex += numverts;
 }
 //PGM
 //============
@@ -370,9 +372,9 @@ void R_RenderBrushPoly (msurface_t *fa)
 //======
 //PGM
 	if(fa->texinfo->flags & SURF_FLOWING)
-		DrawVkFlowingPoly (fa, &currentmodel->vertexbuffer);
+		DrawVkFlowingPoly (fa, currentmodel->vertexbuffer);
 	else
-		DrawVkPoly (fa->polys, &currentmodel->vertexbuffer);
+		DrawVkPoly (fa->polys, currentmodel->vertexbuffer);
 //PGM
 //======
 
@@ -467,7 +469,7 @@ void R_DrawAlphaSurfaces (void)
 		if (s->flags & SURF_DRAWTURB)
 			EmitWaterPolys (s);
 		else
-			DrawVkPoly (s->polys, &currentmodel->vertexbuffer);
+			DrawVkPoly (s->polys, currentmodel->vertexbuffer);
 	}
 
 	//GL_TexEnv( GL_REPLACE );
