@@ -1037,15 +1037,16 @@ void R_DrawWorld (void)
 	memset (vk_lms.lightmap_surfaces, 0, sizeof(vk_lms.lightmap_surfaces));
 	R_ClearSkyBox ();
 
+	assert(vb->firstvertex == 0);
     res = vkMapMemory(vk_context.device, vb->memory, 
-		vb->firstvertex * sizeof(vkpolyvertex_t),	// offset
-		VK_WHOLE_SIZE,								// rest of buffer
+		0,				// offset
+		VK_WHOLE_SIZE,	// rest of buffer
 		0, &vb->memptr);
 	if (res != VK_SUCCESS)
         return;
 
 	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
-    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &r_worldmodel->vertexbuffer->buffer, &offset);
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
     R_RecursiveWorldNode(r_worldmodel->nodes);
 
