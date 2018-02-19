@@ -453,8 +453,12 @@ void R_SetupFrame(void)
     for (i = 0; i<r_newrefdef.num_entities; i++)
 	{
 		entity_t *ent = &r_newrefdef.entities[i];
-		vkbuffer_t *vb = ent->model->vertexbuffer;
-		if (vb) vb->firstvertex = 0;
+		model_t *mod = ent->model;
+		if (mod)
+		{
+			vkbuffer_t *vb = ent->model->vertexbuffer;
+			if (vb) vb->firstvertex = 0;
+		}
 	}
 }
 
