@@ -47,31 +47,31 @@ VkPipeline Vk_CreateDefaultPipeline(
     stages[1] = frag;
 
     // position
-    vertex_bindings[0].binding = 0;
+    vertex_bindings[0].binding = 1;
     vertex_bindings[0].stride = sizeof(float) * 4; // see gl_mesh.c, ln 159
     vertex_bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     // color
-    vertex_bindings[1].binding = 1;
+    vertex_bindings[1].binding = 2;
     vertex_bindings[1].stride = sizeof(float) * 3; 
     vertex_bindings[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     // texcoord
-    vertex_bindings[2].binding = 2;
+    vertex_bindings[2].binding = 3;
     vertex_bindings[2].stride = sizeof(float) * 2; 
     vertex_bindings[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     // position
     vertex_attribs[0].location = 0;
-    vertex_attribs[0].binding = 0;
+    vertex_attribs[0].binding = 1;
     vertex_attribs[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
     vertex_attribs[0].offset = 0;
     // color
     vertex_attribs[1].location = 1;
-    vertex_attribs[1].binding = 1;
+    vertex_attribs[1].binding = 2;
     vertex_attribs[1].format = VK_FORMAT_R32G32B32_SFLOAT;
     vertex_attribs[1].offset = 0;
     // texcoord
     vertex_attribs[2].location = 2;
-    vertex_attribs[2].binding = 2;
+    vertex_attribs[2].binding = 3;
     vertex_attribs[2].format = VK_FORMAT_R32G32_SFLOAT;
     vertex_attribs[2].offset = 0;
 

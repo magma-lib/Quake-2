@@ -468,7 +468,10 @@ void R_BeginRenderAliasModels()
         offsets[i] = 0;
     }
 
-    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, ALIAS_NUM_ATTRIBS, vertexbuffers, offsets);
+	// BSP occupies vertex binding 0
+	vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &r_worldmodel->vertexbuffer->buffer, offsets);
+	// alias models occupy bindings from 1 to 3
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 1, ALIAS_NUM_ATTRIBS, vertexbuffers, offsets);
     vkCmdBindIndexBuffer(vk_context.cmdbuffer, s_alias.indexbuffer.buffer, offsets[0], VK_INDEX_TYPE_UINT16);
 
     for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
@@ -501,8 +504,13 @@ void R_EndRenderAliasModels()
     int i;
 
     for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
+	{
         vkUnmapMemory(vk_context.device, s_alias.vertexattribs[i].memory);
+		s_alias.vertexattribs[i].memptr = NULL;
+	}
+
     vkUnmapMemory(vk_context.device, s_alias.indexbuffer.memory);
+	s_alias.indexbuffer.memptr = NULL;
 
     s_alias.currentvert = NULL;
     s_alias.currentcolor = NULL;
