@@ -121,9 +121,9 @@ void VK_UpdateSwapInterval(void);
 
 typedef struct
 {
-    float	x, y, z;
-    float	s, t;
-    float	r, g, b;
+	float	x, y, z;
+	float	s, t;
+	float	r, g, b;
 } vkvert_t;
 
 
@@ -311,86 +311,86 @@ void VK_TextureSolidMode(char *string);
 
 typedef struct
 {
-    VkImage         image;
-    VkImageView     view;
-    VkDeviceMemory  memory;
+	VkImage			image;
+	VkImageView		view;
+	VkDeviceMemory	memory;
 } vkimage_t;
 
 typedef struct
 {
-    VkInstance          instance;
-    VkPhysicalDevice    phys_device;
-    VkDevice            device;
-    VkQueue             queue, transfer_queue;
-
-    VkSemaphore         present, render;
-    VkFence             fences[2];
-
-    VkCommandPool       cmdpool;
-    VkCommandBuffer     cmdbuffer;
-
-    vkimage_t           front;
-    vkimage_t           back;
-    vkimage_t           depth_stencil;
-
-    VkRenderPass        renderpass;
-    VkFramebuffer       framebuffers[2];
-    VkFramebuffer       curr_framebuffer;
-    VkImage             *swap_images;
-
-    VkDescriptorPool    dpool;
-    VkDescriptorSetLayout   dset_layout;
-    VkDescriptorSet     dset;
-
-    VkPipelineLayout    pipeline_layout;
-    VkPipeline          pipeline_world;
-    VkPipeline          pipeline_tri_strip;
-    VkPipeline          pipeline_tri_fan;
-
-    VkDebugReportCallbackEXT debug_report_callback;
-} vkcontext_t;
-
-typedef struct
-{
-    vkbuffer_t          perframe;
-    vkbuffer_t          perobject;
-    XMMATRIX            entities[MAX_ENTITIES];
-    uint32_t            offset;
+	vkbuffer_t		perframe;
+	vkbuffer_t		perobject;
+	XMMATRIX		entities[MAX_ENTITIES];
+	uint32_t		offset;
 } vkmatrices_t;
 
 typedef struct
 {
-    VkPipelineShaderStageCreateInfo tnl_alias_v;
-    VkPipelineShaderStageCreateInfo tnl_alias_f;
-    VkPipelineShaderStageCreateInfo tnl_world_v;
-    VkPipelineShaderStageCreateInfo tnl_world_f;
+	VkInstance			instance;
+	VkPhysicalDevice	phys_device;
+	VkDevice			device;
+	VkQueue				queue, transfer_queue;
+
+	VkSemaphore			present, render;
+	VkFence				fences[2];
+
+	VkCommandPool		cmdpool;
+	VkCommandBuffer		cmdbuffer;
+
+	vkimage_t			front;
+	vkimage_t			back;
+	vkimage_t			depth_stencil;
+
+	VkRenderPass		renderpass;
+	VkFramebuffer		framebuffers[2];
+	VkFramebuffer		curr_framebuffer;
+	VkImage				*swap_images;
+
+	VkDescriptorPool	dpool;
+	VkDescriptorSetLayout   dset_layout;
+	VkDescriptorSet		dset;
+
+	VkPipelineLayout	pipeline_layout;
+	VkPipeline			pipeline_world;
+	VkPipeline			pipeline_tri_strip;
+	VkPipeline			pipeline_tri_fan;
+
+	VkDebugReportCallbackEXT debug_report_callback;
+} vkcontext_t;
+
+typedef struct
+{
+	VkPipelineShaderStageCreateInfo tnl_alias_v;
+	VkPipelineShaderStageCreateInfo tnl_alias_f;
+	VkPipelineShaderStageCreateInfo tnl_world_v;
+	VkPipelineShaderStageCreateInfo tnl_world_f;
 } vkshaders_t;
 
 typedef struct
 {
-    int         renderer;
+	int		 renderer;
 } vkconfig_t;
 
 typedef struct
 {
-    float inverse_intensity;
-    qboolean fullscreen;
+	float inverse_intensity;
+	qboolean fullscreen;
 
-    int     prev_mode;
+	int	 prev_mode;
 
-    unsigned char *d_16to8table;
+	unsigned char *d_16to8table;
 
-    int lightmap_textures;
+	int lightmap_textures;
 
-    int	currenttextures[2];
-    int currenttmu;
+	int	currenttextures[2];
+	int currenttmu;
 
-    float camera_separation;
-    qboolean stereo_enabled;
+	float camera_separation;
+	qboolean stereo_enabled;
 
-    unsigned char originalRedGammaTable[256];
-    unsigned char originalGreenGammaTable[256];
-    unsigned char originalBlueGammaTable[256];
+	unsigned char originalRedGammaTable[256];
+	unsigned char originalGreenGammaTable[256];
+	unsigned char originalBlueGammaTable[256];
 } vkstate_t;
 
 extern vkcontext_t vk_context;

@@ -168,12 +168,12 @@ typedef struct mleaf_s
 
 typedef struct
 {
-    VkBuffer            buffer;
-    VkDeviceMemory      memory;
-    VkDeviceSize        size;
-    VkBufferUsageFlags  usage;
-    void                *memptr;
-    uint32_t            offset;
+	VkBuffer			buffer;
+	VkDeviceMemory		memory;
+	VkDeviceSize		size;
+	VkBufferUsageFlags	usage;
+	void				*memptr;
+	uint32_t			offset;
 } vkbuffer_t;
 
 //
