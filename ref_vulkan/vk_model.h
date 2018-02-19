@@ -222,6 +222,7 @@ typedef struct model_s
 
 	int			numvertexes;
 	mvertex_t	*vertexes;
+	vkbuffer_t	vertexbuffer;	// brush vertex data
 
 	int			numedges;
 	medge_t		*edges;
@@ -251,14 +252,6 @@ typedef struct model_s
 
 	int			extradatasize;
 	void		*extradata;
-
-//
-// vertex and index data
-//
-    vkbuffer_t  vertex_buffer;
-    vkbuffer_t  color_buffer;
-    vkbuffer_t  texcoord_buffer;
-    vkbuffer_t  index_buffer;
 } model_t;
 
 //============================================================================

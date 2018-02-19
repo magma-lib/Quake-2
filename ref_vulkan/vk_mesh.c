@@ -36,6 +36,30 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 typedef float vec4_t[4];
 
+#define MAX_ALIAS_VERTICES      USHRT_MAX
+#define MAX_ALIAS_INDICES       USHRT_MAX
+
+#define ALIAS_ATTRIB_VERTEX     0
+#define ALIAS_ATTRIB_COLOR      1
+#define ALIAS_ATTRIB_TEXCOORD   2
+#define ALIAS_NUM_ATTRIBS       3
+
+typedef struct 
+{
+    vkbuffer_t  vertexattribs[ALIAS_NUM_ATTRIBS];
+    vkbuffer_t  indexbuffer;
+
+    vec4_t      *currentvert;
+    float       *currentcolor;
+    float       *currenttexcoord;
+    uint16_t    *currentindex;
+
+    uint32_t    vertexoffset;
+    uint32_t    indexoffset;
+} vkaliasvertexdata;
+
+static vkaliasvertexdata s_alias;
+
 vec3_t	shadevector;
 float	shadelight[3];
 
@@ -76,31 +100,6 @@ void Vk_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 }
 
 /*
-=================
-Vk_AliasBindBuffers
-
-bind mesh vertex, color and texcoord buffers
-bind mesh index buffer
-=================
-*/
-void Vk_AliasBindBuffers(model_t *mod)
-{
-    VkBuffer buffers[3];
-    VkDeviceSize offsets[3];
-
-    buffers[0] = mod->vertex_buffer.buffer;
-    buffers[1] = mod->color_buffer.buffer;
-    buffers[2] = mod->texcoord_buffer.buffer;
-
-    offsets[0] = 0;
-    offsets[1] = 0;
-    offsets[2] = 0;
-
-    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 3, buffers, offsets);
-    vkCmdBindIndexBuffer(vk_context.cmdbuffer, mod->index_buffer.buffer, offsets[0], VK_INDEX_TYPE_UINT16);
-}
-
-/*
 =============
 Vk_DrawAliasFrameLerp
 
@@ -121,7 +120,7 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
     vec3_t	frontv, backv;
     int		i;
     int		index_xyz;
-    void    *lerp;
+    float    *lerp;
     float   *texcoords;
     unsigned short *indices;
 
@@ -170,11 +169,8 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         backv[i] = backlerp * oldframe->scale[i];
     }
 
-    if (vkMapMemory(vk_context.device, mod->vertex_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&lerp) == VK_SUCCESS)
-    {
-        Vk_LerpVerts(paliashdr->num_xyz, v, ov, verts, (float *)lerp, move, frontv, backv);
-        vkUnmapMemory(vk_context.device, mod->vertex_buffer.memory);
-    }
+    lerp = &s_alias.currentvert[0];
+    Vk_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
 
     if (true)
     {
@@ -184,77 +180,79 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         }
         else
         {
-            float *colors;
+            float *colors = s_alias.currentcolor;
 
-            //
-            // pre light everything
-            //
-            if (vkMapMemory(vk_context.device, mod->color_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&colors) == VK_SUCCESS)
-            {
-                for (i = 0; i < paliashdr->num_xyz; i++)
-                {
-                    float l = shadedots[verts[i].lightnormalindex];
+			//
+			// pre light everything
+			//
+			for ( i = 0; i < paliashdr->num_xyz; i++ )
+			{
+				float l = shadedots[verts[i].lightnormalindex];
 
-                    colors[i * 3 + 0] = l * shadelight[0];
-                    colors[i * 3 + 1] = l * shadelight[1];
-                    colors[i * 3 + 2] = l * shadelight[2];
-                }
-                vkUnmapMemory(vk_context.device, mod->color_buffer.memory);
-            }
+				colors[i*3+0] = l * shadelight[0];
+				colors[i*3+1] = l * shadelight[1];
+				colors[i*3+2] = l * shadelight[2];
+			}
         }
 
-        if (vkMapMemory(vk_context.device, mod->texcoord_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&texcoords) == VK_SUCCESS)
+        float *texcoords = s_alias.currenttexcoord;
+        uint16_t *indices = s_alias.currentindex;
+        uint32_t first = s_alias.indexoffset;
+
+        while (1)
         {
-            if (vkMapMemory(vk_context.device, mod->index_buffer.memory, 0, VK_WHOLE_SIZE, 0, (void **)&indices) == VK_SUCCESS)
+            // get the vertex count and primitive type
+            count = *order++;
+            if (!count)
+                break;		// done
+            if (count < 0)
             {
-                uint32_t first = 0;
-
-                while (1)
-                {
-                    // get the vertex count and primitive type
-                    count = *order++;
-                    if (!count)
-                        break;		// done
-                    if (count < 0)
-                    {
-                        count = -count;
-                        vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_fan);
-                    }
-                    else
-                    {
-                        vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_strip);
-                    }
-
-                    // PMM - added double damage shell
-                    if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
-                    {
-                        for (i = 0; i < count; ++i)
-                        {
-                            *indices++ = order[2];
-                            order += 3;
-                        };
-
-                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, 0, 0);
-                    }
-                    else
-                    {
-                        for (i = 0; i < count; ++i)
-                        {
-                            *texcoords++ = ((float *)order)[0];
-                            *texcoords++ = ((float *)order)[1];
-                            *indices++ = (unsigned short)order[2];
-                            order += 3;
-                        }
-
-                        vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, 0, 0);
-                    }
-
-                    first += count;
-                }
+                count = -count;
+                vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_fan);
             }
-            vkUnmapMemory(vk_context.device, mod->index_buffer.memory);
+            else
+            {
+                vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_strip);
+            }
+
+            // PMM - added double damage shell
+            if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
+            {
+                for (i = 0; i < count; ++i)
+                {
+                    *indices++ = order[2];
+                    order += 3;
+                };
+
+                vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, s_alias.vertexoffset, 0);
+            }
+            else
+            {
+                for (i = 0; i < count; ++i)
+                {
+                    float *st = (float *)order;
+                    uint16_t index = (uint16_t)order[2];
+
+                    texcoords[index*2+0] = st[0];
+                    texcoords[index*2+1] = st[1];
+                    *indices++ = index;
+
+                    order += 3;
+                }
+
+                vkCmdDrawIndexed(vk_context.cmdbuffer, count, 1, first, s_alias.vertexoffset, 0);
+            }
+
+            first += count;
         }
-        vkUnmapMemory(vk_context.device, mod->texcoord_buffer.memory);
+
+        // shift offsets
+        s_alias.currentvert += paliashdr->num_xyz;
+        s_alias.currentcolor += paliashdr->num_xyz * 3;
+        s_alias.currenttexcoord += paliashdr->num_xyz * 2;
+        s_alias.currentindex = indices;
+        s_alias.vertexoffset += paliashdr->num_xyz;
+        s_alias.indexoffset = first;
     }
    
     //	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE ) )
@@ -439,6 +437,77 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 
 		return false;
 	}
+}
+
+/*
+=================
+R_BeginRenderAliasModels
+
+=================
+*/
+void R_BeginRenderAliasModels()
+{
+    VkBuffer vertexbuffers[ALIAS_NUM_ATTRIBS];
+    VkDeviceSize offsets[ALIAS_NUM_ATTRIBS];
+    int i;
+
+    //=================================================
+    if (s_alias.vertexattribs[0].buffer == 0)
+    {
+        Vk_CreateVertexBuffer(MAX_ALIAS_VERTICES * sizeof(vec4_t), &s_alias.vertexattribs[ALIAS_ATTRIB_VERTEX]);
+        Vk_CreateVertexBuffer(MAX_ALIAS_VERTICES * sizeof(float) * 3, &s_alias.vertexattribs[ALIAS_ATTRIB_COLOR]);
+        Vk_CreateVertexBuffer(MAX_ALIAS_VERTICES * sizeof(float) * 2, &s_alias.vertexattribs[ALIAS_ATTRIB_TEXCOORD]);
+
+        Vk_CreateIndexBuffer(MAX_ALIAS_INDICES * sizeof(uint16_t), &s_alias.indexbuffer);
+    }
+    //=================================================
+
+    for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
+    {
+        vertexbuffers[i] = s_alias.vertexattribs[i].buffer;
+        offsets[i] = 0;
+    }
+
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, ALIAS_NUM_ATTRIBS, vertexbuffers, offsets);
+    vkCmdBindIndexBuffer(vk_context.cmdbuffer, s_alias.indexbuffer.buffer, offsets[0], VK_INDEX_TYPE_UINT16);
+
+    for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
+    {
+        vkMapMemory(vk_context.device, s_alias.vertexattribs[i].memory, 
+            0, VK_WHOLE_SIZE, 
+            0, &s_alias.vertexattribs[i].memptr);
+    }
+
+    s_alias.currentvert = (vec4_t *)s_alias.vertexattribs[ALIAS_ATTRIB_VERTEX].memptr;
+    s_alias.currentcolor = (float *)s_alias.vertexattribs[ALIAS_ATTRIB_COLOR].memptr;
+    s_alias.currenttexcoord = (float *)s_alias.vertexattribs[ALIAS_ATTRIB_TEXCOORD].memptr;
+
+    vkMapMemory(vk_context.device, s_alias.indexbuffer.memory,
+        0, VK_WHOLE_SIZE,
+        0, (void **)&s_alias.currentindex);
+
+    s_alias.vertexoffset = 0;
+    s_alias.indexoffset = 0;
+}
+
+/*
+=================
+R_EndRenderAliasModels
+
+=================
+*/
+void R_EndRenderAliasModels()
+{
+    int i;
+
+    for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
+        vkUnmapMemory(vk_context.device, s_alias.vertexattribs[i].memory);
+    vkUnmapMemory(vk_context.device, s_alias.indexbuffer.memory);
+
+    s_alias.currentvert = NULL;
+    s_alias.currentcolor = NULL;
+    s_alias.currenttexcoord = NULL;
+    s_alias.currentindex = NULL;
 }
 
 /*
@@ -698,7 +767,6 @@ void R_DrawAliasModel(entity_t *e)
     if (!r_lerpmodels->value)
         currententity->backlerp = 0;
 
-    Vk_AliasBindBuffers(currentmodel);
     Vk_DrawAliasFrameLerp(paliashdr, currententity->backlerp, currentmodel);
 
     if ((currententity->flags & RF_WEAPONMODEL) && (r_lefthand->value == 1.0F))
@@ -721,4 +789,5 @@ void R_DrawAliasModel(entity_t *e)
     }
 #endif
 }
+
 

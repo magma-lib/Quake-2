@@ -351,7 +351,7 @@ void Mod_LoadVertexes (lump_t *l)
 		out->position[2] = LittleFloat (in->point[2]);
 	}
 
-    Vk_CreateVertexBuffer(loadmodel->numvertexes * sizeof(float) * VERTEXSIZE * 2, &loadmodel->vertex_buffer); // xyz s1t1 s2t2
+    Vk_CreateVertexBuffer(loadmodel->numvertexes * sizeof(float) * VERTEXSIZE * 2, &loadmodel->vertexbuffer); // xyz s1t1 s2t2
 }
 
 /*
@@ -1044,11 +1044,6 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mod->maxs[0] = 32;
 	mod->maxs[1] = 32;
 	mod->maxs[2] = 32;
-
-    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(float) * 4, &mod->vertex_buffer);
-    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(vec3_t), &mod->color_buffer);
-    Vk_CreateVertexBuffer(pheader->num_xyz * sizeof(float) * 2, &mod->texcoord_buffer);
-    Vk_CreateIndexBuffer(pheader->num_tris * sizeof(short) * 3, &mod->index_buffer);
 }
 
 /*
@@ -1208,10 +1203,7 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
-    Vk_DestroyBuffer(&mod->vertex_buffer);
-    Vk_DestroyBuffer(&mod->color_buffer);
-    Vk_DestroyBuffer(&mod->texcoord_buffer);
-    Vk_DestroyBuffer(&mod->index_buffer);
+    Vk_DestroyBuffer(&mod->vertexbuffer);
 
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));

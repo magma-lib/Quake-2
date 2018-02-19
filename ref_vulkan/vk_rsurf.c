@@ -370,9 +370,9 @@ void R_RenderBrushPoly (msurface_t *fa)
 //======
 //PGM
 	if(fa->texinfo->flags & SURF_FLOWING)
-		DrawVkFlowingPoly (fa, &currentmodel->vertex_buffer);
+		DrawVkFlowingPoly (fa, &currentmodel->vertexbuffer);
 	else
-		DrawVkPoly (fa->polys, &currentmodel->vertex_buffer);
+		DrawVkPoly (fa->polys, &currentmodel->vertexbuffer);
 //PGM
 //======
 
@@ -467,7 +467,7 @@ void R_DrawAlphaSurfaces (void)
 		if (s->flags & SURF_DRAWTURB)
 			EmitWaterPolys (s);
 		else
-			DrawVkPoly (s->polys, &currentmodel->vertex_buffer);
+			DrawVkPoly (s->polys, &currentmodel->vertexbuffer);
 	}
 
 	//GL_TexEnv( GL_REPLACE );
@@ -1003,7 +1003,7 @@ void R_DrawWorld (void)
     VkBuffer buffers[1];
     VkDeviceSize offsets[1];
 
-    buffers[0] = r_worldmodel->vertex_buffer.buffer;
+    buffers[0] = r_worldmodel->vertexbuffer.buffer;
     offsets[0] = 0;
 
     vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
@@ -1011,9 +1011,9 @@ void R_DrawWorld (void)
     vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 0, 1, &vk_context.dset, 1, &dynoffset);
     vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, buffers, offsets);
 
-    if (vkMapMemory(vk_context.device, r_worldmodel->vertex_buffer.memory, 0, 1000 * 3 * sizeof(float) * VERTEXSIZE, 0, &r_worldmodel->vertex_buffer.memptr) != VK_SUCCESS)
+    if (vkMapMemory(vk_context.device, r_worldmodel->vertexbuffer.memory, 0, 1000 * 3 * sizeof(float) * VERTEXSIZE, 0, &r_worldmodel->vertexbuffer.memptr) != VK_SUCCESS)
         return;
-    r_worldmodel->vertex_buffer.offset = 0;
+    r_worldmodel->vertexbuffer.offset = 0;
 
     R_RecursiveWorldNode(r_worldmodel->nodes);
 
@@ -1028,7 +1028,7 @@ void R_DrawWorld (void)
 
     R_DrawTriangleOutlines();
 
-    vkUnmapMemory(vk_context.device, r_worldmodel->vertex_buffer.memory);
+    vkUnmapMemory(vk_context.device, r_worldmodel->vertexbuffer.memory);
 }
 
 

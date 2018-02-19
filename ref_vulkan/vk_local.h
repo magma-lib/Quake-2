@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 
 #ifdef _WIN32
 #   define VK_USE_PLATFORM_WIN32_KHR
@@ -252,6 +253,8 @@ int 	R_Init(void *hinstance, void *hWnd);
 void	R_Shutdown(void);
 
 void R_RenderView(refdef_t *fd);
+void R_BeginRenderAliasModels();
+void R_EndRenderAliasModels();
 void R_DrawAliasModel(entity_t *e);
 void R_DrawBrushModel(entity_t *e);
 void R_DrawSpriteModel(entity_t *e);

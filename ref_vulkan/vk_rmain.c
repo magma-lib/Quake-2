@@ -221,6 +221,8 @@ void R_DrawEntitiesOnList(void)
     if (!r_drawentities->value)
         return;
 
+    R_BeginRenderAliasModels();
+
     // draw non-transparent first
     for (i = 0; i<r_newrefdef.num_entities; i++)
     {
@@ -299,6 +301,7 @@ void R_DrawEntitiesOnList(void)
     }
     //qglDepthMask(1);		// back to writing
 
+    R_EndRenderAliasModels();
 }
 
 /*
