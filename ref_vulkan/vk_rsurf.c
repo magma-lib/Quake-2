@@ -469,7 +469,10 @@ void R_DrawAlphaSurfaces (void)
 		if (s->flags & SURF_DRAWTURB)
 			EmitWaterPolys (s);
 		else
-			DrawVkPoly (s->polys, currentmodel->vertexbuffer);
+		{
+			//TODO: if model doesn't allocates buffer yet, allocate it on-demand
+			//DrawVkPoly (s->polys, currentmodel->vertexbuffer);
+		}
 	}
 
 	//GL_TexEnv( GL_REPLACE );
