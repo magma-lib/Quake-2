@@ -257,7 +257,7 @@ void R_DrawEntitiesOnList(void)
                 R_DrawAliasModel(currententity);
                 break;
             case mod_brush:
-                //R_DrawBrushModel(currententity);
+                R_DrawBrushModel(currententity);
                 break;
             case mod_sprite:
                 //R_DrawSpriteModel(currententity);
@@ -297,7 +297,7 @@ void R_DrawEntitiesOnList(void)
                 R_DrawAliasModel(currententity);
                 break;
             case mod_brush:
-                //R_DrawBrushModel(currententity);
+                R_DrawBrushModel(currententity);
                 break;
             case mod_sprite:
                 //R_DrawSpriteModel(currententity);

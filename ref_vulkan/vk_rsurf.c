@@ -681,6 +681,10 @@ void R_DrawInlineBModel (void)
 	float		dot;
 	msurface_t	*psurf;
 	dlight_t	*lt;
+	vkbuffer_t  *vb;
+	int         numverts;
+	VkResult    res;
+	VkDeviceSize offset;
 
 	// calculate dynamic lighting for bmodel
 	if ( !vk_flashblend->value )
@@ -693,6 +697,7 @@ void R_DrawInlineBModel (void)
 	}
 
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
+	vb = currentmodel->vertexbuffer;
 
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
@@ -700,6 +705,24 @@ void R_DrawInlineBModel (void)
 		//qglColor4f (1,1,1,0.25);
 		//GL_TexEnv( GL_MODULATE );
 	}
+
+	// calculate how many vertices potentially can be drawn
+	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++)
+	{
+		msurface_t *s = &currentmodel->surfaces[currentmodel->firstmodelsurface + i];
+		numverts += (s->polys->numverts - 2) * 3;
+	}
+
+    res = vkMapMemory(vk_context.device, vb->memory, 
+		vb->firstvertex * sizeof(vkpolyvertex_t),	// offset
+		numverts * sizeof(vkpolyvertex_t),			// chunk size
+		0, &vb->memptr);
+	if (res != VK_SUCCESS)
+		return;
+
+	offset = 0;
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
 	//
 	// draw texture
@@ -720,9 +743,9 @@ void R_DrawInlineBModel (void)
 				psurf->texturechain = r_alpha_surfaces;
 				r_alpha_surfaces = psurf;
 			}
-			else if (!( psurf->flags & SURF_DRAWTURB ) )
+			else if (false && !( psurf->flags & SURF_DRAWTURB ) )
 			{
-				Vk_RenderLightmappedPoly( psurf );
+				Vk_RenderLightmappedPoly( psurf ); // TODO: this should be the only way to render
 			}
 			else
 			{
@@ -744,6 +767,9 @@ void R_DrawInlineBModel (void)
 		//qglColor4f (1,1,1,1);
 		//GL_TexEnv( GL_REPLACE );
 	}
+
+	vkUnmapMemory(vk_context.device, vb->memory);
+	vb->memptr = NULL;
 }
 
 /*
