@@ -223,15 +223,6 @@ void R_DrawEntitiesOnList(void)
 
     R_BeginRenderAliasModels();
 
-	// clear vertex offsets
-	r_worldmodel->vertexbuffer->firstvertex = 0;
-    for (i = 0; i<r_newrefdef.num_entities; i++)
-	{
-		entity_t *ent = &r_newrefdef.entities[i];
-		vkbuffer_t *vb = ent->model->vertexbuffer;
-		if (vb) vb->firstvertex = 0;
-	}
-
     // draw non-transparent first
     for (i = 0; i<r_newrefdef.num_entities; i++)
     {
@@ -456,6 +447,15 @@ void R_SetupFrame(void)
     {
         // TODO:
     }
+
+	// clear vertex offsets
+	r_worldmodel->vertexbuffer->firstvertex = 0;
+    for (i = 0; i<r_newrefdef.num_entities; i++)
+	{
+		entity_t *ent = &r_newrefdef.entities[i];
+		vkbuffer_t *vb = ent->model->vertexbuffer;
+		if (vb) vb->firstvertex = 0;
+	}
 }
 
 /*
