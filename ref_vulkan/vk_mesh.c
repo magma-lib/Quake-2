@@ -48,12 +48,6 @@ typedef struct
 {
     vkbuffer_t  vertexattribs[ALIAS_NUM_ATTRIBS];
     vkbuffer_t  indexbuffer;
-
-    vec4_t      *currentvert;
-    float       *currentcolor;
-    float       *currenttexcoord;
-    uint16_t    *currentindex;
-
     uint32_t    vertexoffset;
     uint32_t    indexoffset;
 } vkaliasvertexdata;
@@ -169,7 +163,7 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         backv[i] = backlerp * oldframe->scale[i];
     }
 
-    lerp = &s_alias.currentvert[0];
+    lerp = s_alias.vertexattribs[ALIAS_ATTRIB_VERTEX].memptr;
     Vk_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
 
     if (true)
@@ -180,7 +174,7 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         }
         else
         {
-            float *colors = s_alias.currentcolor;
+            float *colors = s_alias.vertexattribs[ALIAS_ATTRIB_COLOR].memptr;
 
 			//
 			// pre light everything
@@ -195,8 +189,8 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
 			}
         }
 
-        float *texcoords = s_alias.currenttexcoord;
-        uint16_t *indices = s_alias.currentindex;
+        float *texcoords = s_alias.vertexattribs[ALIAS_ATTRIB_TEXCOORD].memptr;
+        uint16_t *indices = s_alias.indexbuffer.memptr;
         uint32_t first = s_alias.indexoffset;
 
         while (1)
@@ -247,10 +241,13 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
         }
 
         // shift offsets
-        s_alias.currentvert += paliashdr->num_xyz;
-        s_alias.currentcolor += paliashdr->num_xyz * 3;
-        s_alias.currenttexcoord += paliashdr->num_xyz * 2;
-        s_alias.currentindex = indices;
+		for (i = 0; i<ALIAS_NUM_ATTRIBS; i++)
+		{
+			int size[3] = {4, 3, 2}; // vec4, rgb, st
+			int num_floats = paliashdr->num_xyz * size[i];
+			s_alias.vertexattribs[i].memptr = ((float *)s_alias.vertexattribs[i].memptr) + num_floats;
+		}
+		s_alias.indexbuffer.memptr = indices;
         s_alias.vertexoffset += paliashdr->num_xyz;
         s_alias.indexoffset = first;
     }
@@ -447,9 +444,10 @@ R_BeginRenderAliasModels
 */
 void R_BeginRenderAliasModels()
 {
-    VkBuffer vertexbuffers[ALIAS_NUM_ATTRIBS];
+    VkBuffer	vertexbuffers[ALIAS_NUM_ATTRIBS];
     VkDeviceSize offsets[ALIAS_NUM_ATTRIBS];
-    int i;
+	VkResult	res;
+    int			i;
 
     //=================================================
     if (s_alias.vertexattribs[0].buffer == 0)
@@ -476,18 +474,16 @@ void R_BeginRenderAliasModels()
 
     for (i = 0; i < ALIAS_NUM_ATTRIBS; ++i)
     {
-        vkMapMemory(vk_context.device, s_alias.vertexattribs[i].memory, 
+        res = vkMapMemory(vk_context.device, s_alias.vertexattribs[i].memory, 
             0, VK_WHOLE_SIZE, 
             0, &s_alias.vertexattribs[i].memptr);
+		if (res != VK_SUCCESS)
+			return;
     }
-
-    s_alias.currentvert = (vec4_t *)s_alias.vertexattribs[ALIAS_ATTRIB_VERTEX].memptr;
-    s_alias.currentcolor = (float *)s_alias.vertexattribs[ALIAS_ATTRIB_COLOR].memptr;
-    s_alias.currenttexcoord = (float *)s_alias.vertexattribs[ALIAS_ATTRIB_TEXCOORD].memptr;
 
     vkMapMemory(vk_context.device, s_alias.indexbuffer.memory,
         0, VK_WHOLE_SIZE,
-        0, (void **)&s_alias.currentindex);
+        0, (void **)&s_alias.indexbuffer.memptr);
 
     s_alias.vertexoffset = 0;
     s_alias.indexoffset = 0;
@@ -511,11 +507,6 @@ void R_EndRenderAliasModels()
 
     vkUnmapMemory(vk_context.device, s_alias.indexbuffer.memory);
 	s_alias.indexbuffer.memptr = NULL;
-
-    s_alias.currentvert = NULL;
-    s_alias.currentcolor = NULL;
-    s_alias.currenttexcoord = NULL;
-    s_alias.currentindex = NULL;
 }
 
 /*
