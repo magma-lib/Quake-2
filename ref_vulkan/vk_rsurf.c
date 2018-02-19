@@ -707,6 +707,7 @@ void R_DrawInlineBModel (void)
 	}
 
 	// calculate how many vertices potentially can be drawn
+	numverts = 0;
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++)
 	{
 		msurface_t *s = &currentmodel->surfaces[currentmodel->firstmodelsurface + i];
