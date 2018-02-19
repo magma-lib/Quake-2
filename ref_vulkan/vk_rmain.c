@@ -594,12 +594,15 @@ void R_PostUpdate(void)
 {
     VkDeviceSize size;
 
-    size = vk_transforms.offset * sizeof(XMMATRIX);
-    if (vkMapMemory(vk_context.device, vk_transforms.perobject.memory, 0, size, 0, &vk_transforms.perobject.memptr) == VK_SUCCESS)
-    {
-        memcpy(vk_transforms.perobject.memptr, vk_transforms.entities, size);
-        vkUnmapMemory(vk_context.device, vk_transforms.perobject.memory);
-    }
+	if (vk_transforms.offset > 0)
+	{
+		size = vk_transforms.offset * sizeof(XMMATRIX);
+		if (vkMapMemory(vk_context.device, vk_transforms.perobject.memory, 0, size, 0, &vk_transforms.perobject.memptr) == VK_SUCCESS)
+		{
+			memcpy(vk_transforms.perobject.memptr, vk_transforms.entities, size);
+			vkUnmapMemory(vk_context.device, vk_transforms.perobject.memory);
+		}
+	}
 }
 
 /*
