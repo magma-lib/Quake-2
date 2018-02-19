@@ -352,6 +352,7 @@ typedef struct
 
 	VkPipelineLayout	pipeline_layout;
 	VkPipeline			pipeline_world;
+	VkPipeline			pipeline_brush;
 	VkPipeline			pipeline_tri_strip;
 	VkPipeline			pipeline_tri_fan;
 
@@ -364,6 +365,7 @@ typedef struct
 	VkPipelineShaderStageCreateInfo tnl_alias_f;
 	VkPipelineShaderStageCreateInfo tnl_world_v;
 	VkPipelineShaderStageCreateInfo tnl_world_f;
+	VkPipelineShaderStageCreateInfo tnl_brush_v;
 } vkshaders_t;
 
 typedef struct

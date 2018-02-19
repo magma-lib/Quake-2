@@ -850,6 +850,7 @@ static void R_LoadShaders()
     Vk_LoadShader("tnl_alias_v.o", "main", true, &vk_shaders.tnl_alias_v);
     Vk_LoadShader("tnl_alias_f.o", "main", false, &vk_shaders.tnl_alias_f);
     
+	Vk_LoadShader("tnl_brush_v.o", "main", true, &vk_shaders.tnl_brush_v);
     Vk_LoadShader("tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
     Vk_LoadShader("tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
 }
@@ -917,6 +918,7 @@ static void R_InitContextObjects()
     vkCreatePipelineLayout(vk_context.device, &layout_info, NULL, &vk_context.pipeline_layout);
 
     vk_context.pipeline_world = Vk_CreateWorldPipeline(vk_shaders.tnl_world_v, vk_shaders.tnl_world_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+	vk_context.pipeline_brush = Vk_CreateWorldPipeline(vk_shaders.tnl_brush_v, vk_shaders.tnl_world_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     vk_context.pipeline_tri_strip = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
     vk_context.pipeline_tri_fan = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
 }

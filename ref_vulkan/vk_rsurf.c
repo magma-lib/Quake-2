@@ -722,7 +722,8 @@ void R_DrawInlineBModel (void)
 		return;
 
 	offset = 0;
-	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
+	// brush pipeline uses vertex shader with per-object transforms
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_brush);
     vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
 	//
