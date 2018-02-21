@@ -753,7 +753,12 @@ void R_DrawAliasModel (entity_t *e)
 	// draw all the triangles
 	//
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
-		;//qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
+	{
+		VkViewport vp = vk_state.vp;
+		vp.minDepth = vkdepthmin;
+		vp.maxDepth = vkdepthmin + 0.3*(vkdepthmax-vkdepthmin);
+		vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &vp);
+	}
 
 	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
 	{
@@ -857,7 +862,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 
 	if (currententity->flags & RF_DEPTHHACK)
-		;//qglDepthRange (gldepthmin, gldepthmax);
+		vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &vk_state.vp);
 
 #if 1
 	if (vk_shadows->value && !(currententity->flags & (RF_TRANSLUCENT | RF_WEAPONMODEL)))
