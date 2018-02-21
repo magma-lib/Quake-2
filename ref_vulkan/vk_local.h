@@ -119,6 +119,8 @@ void VK_EndRendering(void);
 void VK_SetDefaultState(void);
 void VK_UpdateSwapInterval(void);
 
+extern	float	vkdepthmin, vkdepthmax;
+
 typedef struct
 {
 	float	x, y, z;

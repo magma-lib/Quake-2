@@ -472,16 +472,26 @@ void R_Clear(void)
     VkRenderPassBeginInfo render_pass_begin;
     VkClearValue clear_values[2];
 
-    clear_values[0].color.float32[0] = 0.35f;
-    clear_values[0].color.float32[1] = 0.53f;
-    clear_values[0].color.float32[2] = 0.7f;
-    clear_values[0].color.float32[3] = 1.0f;
-    clear_values[1].depthStencil.depth = 1.0f;
-    clear_values[1].depthStencil.stencil = 0;
+	if (vk_clear->value)
+	{
+		// see GL_SetDefaultState for reference
+		clear_values[0].color.float32[0] = 1.0f;
+		clear_values[0].color.float32[1] = 0.0f;
+		clear_values[0].color.float32[2] = 0.5f;
+		clear_values[0].color.float32[3] = 0.5f;
+	}
+	else
+	{
+		// will be ignored, but don't want to pass junk
+		memset(&clear_values[0], 0, sizeof(VkClearValue)); 
+	}
+
+	clear_values[1].depthStencil.depth = 1.0f;
+	clear_values[1].depthStencil.stencil = 0;
 
     render_pass_begin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     render_pass_begin.pNext = NULL;
-    render_pass_begin.renderPass = vk_context.renderpass;
+    render_pass_begin.renderPass = vk_context.renderpass; // TODO: recreate renderpass if vk_clear changed!
     render_pass_begin.framebuffer = vk_context.curr_framebuffer;
     render_pass_begin.renderArea.offset.x = 0;
     render_pass_begin.renderArea.offset.y = 0;
@@ -491,6 +501,9 @@ void R_Clear(void)
     render_pass_begin.pClearValues = clear_values;
 
     vkCmdBeginRenderPass(vk_context.cmdbuffer, &render_pass_begin, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkdepthmin = 0.f;
+	vkdepthmax = 1.f;
 }
 
 /*
