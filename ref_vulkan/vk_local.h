@@ -377,6 +377,9 @@ typedef struct
 
 typedef struct
 {
+	VkViewport vp;
+	VkRect2D scissor;
+
 	float inverse_intensity;
 	qboolean fullscreen;
 

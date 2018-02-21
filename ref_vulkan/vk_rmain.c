@@ -513,8 +513,6 @@ R_SetViewport
 */
 void R_SetViewport(void)
 {
-    VkViewport viewport;
-    VkRect2D scissor;
     int	x, x2, y2, y, w, h;
     
     x = floor(r_newrefdef.x * vid.width / vid.width);
@@ -525,20 +523,20 @@ void R_SetViewport(void)
     w = x2 - x;
     h = y - y2;
 
-    viewport.x = x;
-    viewport.y = y2;
-    viewport.width = w;
-    viewport.height = -h; // Inverse Y axis to match OpenGL
-    viewport.minDepth = 0.f;
-    viewport.maxDepth = 1.f;
+    vk_state.vp.x = x;
+    vk_state.vp.y = y2;
+    vk_state.vp.width = w;
+    vk_state.vp.height = -h; // Inverse Y axis to match OpenGL
+    vk_state.vp.minDepth = vkdepthmin;
+    vk_state.vp.maxDepth = vkdepthmax;
 
-    scissor.offset.x = x;
-    scissor.offset.y = y2;
-    scissor.extent.width = w;
-    scissor.extent.height = h;
+    vk_state.scissor.offset.x = x;
+    vk_state.scissor.offset.y = y2;
+    vk_state.scissor.extent.width = w;
+    vk_state.scissor.extent.height = h;
 
-    vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &viewport);
-    vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &scissor);
+    vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &vk_state.vp);
+    vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &vk_state.scissor);
 }
 
 /*
