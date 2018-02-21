@@ -106,7 +106,7 @@ qboolean Vk_DSetSetupLayout()
         return false;
     }
 
-    if (!Vk_CreateUniformBuffer(sizeof(XMMATRIX), &vk_transforms.perframe))
+    if (!Vk_CreateUniformBuffer(sizeof(XMMATRIX) * 2, &vk_transforms.perframe))
     {
         ri.Con_Printf(PRINT_ALL, "Couldn't create per-object uniform buffer\n");
         return false;

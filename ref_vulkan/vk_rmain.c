@@ -580,7 +580,10 @@ void R_SetModelViewProjection()
 
     r_viewproj = XMMatrixMultiply(&view, &proj);
 
-    if (vkMapMemory(vk_context.device, vk_transforms.perframe.memory, 0, VK_WHOLE_SIZE, 0, &vk_transforms.perframe.memptr) == VK_SUCCESS)
+    if (vkMapMemory(vk_context.device, vk_transforms.perframe.memory, 
+		0, 
+		sizeof(XMMATRIX), 
+		0, &vk_transforms.perframe.memptr) == VK_SUCCESS)
     {
         memcpy(vk_transforms.perframe.memptr, &r_viewproj, sizeof(XMMATRIX));
         vkUnmapMemory(vk_context.device, vk_transforms.perframe.memory);
