@@ -1149,7 +1149,7 @@ void R_BeginFrame(float camera_separation)
 	{	// FIXME: only restart if CDS is required
 		cvar_t	*ref;
 
-		ref = ri.Cvar_Get ("vid_ref", "gl", 0);
+		ref = ri.Cvar_Get ("vid_ref", "vulkan", 0);
 		ref->modified = true;
 	}
 
