@@ -63,6 +63,8 @@ vec3_t	r_origin;
 
 float	r_world_matrix[16];
 float	r_base_world_matrix[16];
+
+XMMATRIX r_ortho;
 XMMATRIX r_viewproj;
 
 //
@@ -1139,32 +1141,92 @@ R_BeginFrame
 */
 void R_BeginFrame(float camera_separation)
 {
-    vk_state.camera_separation = camera_separation;
+	vk_state.camera_separation = camera_separation;
+
+	/*
+	** change modes if necessary
+	*/
+	if ( vk_mode->modified || vid_fullscreen->modified )
+	{	// FIXME: only restart if CDS is required
+		cvar_t	*ref;
+
+		ref = ri.Cvar_Get ("vid_ref", "gl", 0);
+		ref->modified = true;
+	}
+
+	if ( vk_log->modified )
+	{
+		//VKimp_EnableLogging( vk_log->value );
+		vk_log->modified = false;
+	}
+
+	if ( vk_log->value )
+	{
+		//VKimp_LogNewFrame();
+	}
 
     /*
-    ** change modes if necessary
-    */
-    if (vk_mode->modified || vid_fullscreen->modified)
-    {	// FIXME: only restart if CDS is required
-        cvar_t	*ref;
+	** update 3Dfx gamma -- it is expected that a user will do a vid_restart
+	** after tweaking this value
+	*/
+	if ( vid_gamma->modified )
+	{
+		vid_gamma->modified = false;
 
-        ref = ri.Cvar_Get("vid_ref", "gl", 0);
-        ref->modified = true;
-    }
+        // TODO:? 
+	}
 
-    if (vk_log->modified)
+	VKimp_BeginFrame(camera_separation);
+
+	vk_state.vp.x = 0.f;
+	vk_state.vp.y = 0.f;
+	vk_state.vp.width = (float)vid.width;
+	vk_state.vp.height = -(float)vid.height;
+	vk_state.vp.minDepth = 0.f;
+	vk_state.vp.maxDepth = 1.f;
+
+	vk_state.scissor.offset.x = 0;
+	vk_state.scissor.offset.y = 0;
+	vk_state.scissor.extent.width = vid.width;
+	vk_state.scissor.extent.height = vid.height;
+
+	vkCmdSetViewport(vk_context.cmdbuffer, 0, 1, &vk_state.vp);
+	vkCmdSetScissor(vk_context.cmdbuffer, 0, 1, &vk_state.scissor);
+
+	/*
+	** define projection matrix
+	*/
+	r_ortho = XMMatrixOrthographicOffCenterRH(0.f, (float)vid.width, 0.f, (float)vid.height, -99999.f, 99999.f);
+	if (vkMapMemory(vk_context.device, vk_transforms.perframe.memory, 
+		sizeof(XMMATRIX), 
+		sizeof(XMMATRIX), 
+		0, &vk_transforms.perframe.memptr) == VK_SUCCESS)
     {
-        //VKimp_EnableLogging(vk_log->value);
-        vk_log->modified = false;
+        memcpy(vk_transforms.perframe.memptr, &r_ortho, sizeof(XMMATRIX));
+        vkUnmapMemory(vk_context.device, vk_transforms.perframe.memory);
     }
 
-    if (vk_log->value)
-    {
-        //VKimp_LogNewFrame();
-    }
+	/*
+	** texturemode stuff
+	*/
+	if ( vk_texturemode->modified )
+	{
+		vk_texturemode->modified = false;
+	}
 
-    VKimp_BeginFrame(camera_separation);
+	if ( vk_texturealphamode->modified )
+	{
+		vk_texturealphamode->modified = false;
+	}
 
+	if ( vk_texturesolidmode->modified )
+	{
+		vk_texturesolidmode->modified = false;
+	}
+
+    //
+	// clear screen if desired
+	//
     R_Clear();
 }
 
