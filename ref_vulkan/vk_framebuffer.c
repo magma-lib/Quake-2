@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "vk_local.h"
 
-qboolean VK_CreateRenderPass()
+static qboolean VK_CreateRenderPass(qboolean clear)
 {
     VkAttachmentDescription attachments[2];
     VkAttachmentReference color_ref, depth_ref;
@@ -30,7 +30,7 @@ qboolean VK_CreateRenderPass()
     attachments[0].flags = 0;
     attachments[0].format = VK_FORMAT_R8G8B8A8_UNORM;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[0].loadOp = vk_clear->value ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachments[0].loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -83,7 +83,7 @@ qboolean VK_CreateRenderPass()
     return true;
 }
 
-void VK_DestroyRenderPass()
+static void VK_DestroyRenderPass()
 {
     if (vk_context.renderpass)
     {
@@ -92,7 +92,7 @@ void VK_DestroyRenderPass()
     }
 }
 
-qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height)
+qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height, qboolean clear)
 {
     VkImageCreateInfo info;
     VkImageViewCreateInfo view_info;
@@ -190,6 +190,8 @@ qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height)
     view_info.image = vk_context.swap_images[1];
     vkCreateImageView(vk_context.device, &view_info, NULL, &vk_context.back.view);
 
+	VK_CreateRenderPass(clear);
+
     // framebuffer
     fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     fb_info.pNext = NULL;
@@ -215,6 +217,39 @@ qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height)
     }
 
     return true;
+}
+
+void Vk_ChangeRenderPass(uint32_t width, uint32_t height, qboolean clear)
+{
+	VkFramebufferCreateInfo fb_info;
+	VkImageView attachments[2];
+	int i;
+
+	VK_DestroyRenderPass();
+	VK_CreateRenderPass(clear);
+
+	fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fb_info.pNext = NULL;
+    fb_info.flags = 0;
+    fb_info.renderPass = vk_context.renderpass;
+    fb_info.attachmentCount = 2;
+    fb_info.pAttachments = attachments;
+    fb_info.width = width;
+    fb_info.height = height;
+    fb_info.layers = 1;
+
+	attachments[1] = vk_context.depth_stencil.view;
+
+    for (i = 0; i < 2; ++i)
+    {
+        attachments[0] = (i == 0) ? vk_context.front.view : vk_context.back.view;
+		vkDestroyFramebuffer(vk_context.device, vk_context.framebuffers[i], NULL);
+        if (vkCreateFramebuffer(vk_context.device, &fb_info, NULL, &vk_context.framebuffers[i]) != VK_SUCCESS)
+        {
+            VK_DestroyFramebuffer();
+            ri.Sys_Error(ERR_DROP, "Failed to create framebuffer\n");
+        }
+    }
 }
 
 void VK_DestroyFramebuffer()
@@ -255,4 +290,6 @@ void VK_DestroyFramebuffer()
         vkDestroyImage(vk_context.device, vk_context.depth_stencil.image, NULL);
         vk_context.depth_stencil.image = VK_NULL_HANDLE;
     }
+
+	VK_DestroyRenderPass();
 }

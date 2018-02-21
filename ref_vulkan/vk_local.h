@@ -416,9 +416,9 @@ VULKAN OBJECTS
 
 void VK_InitDebugCallback(void);
 void VK_DestroyDebugCallback(void);
-qboolean VK_CreateRenderPass(void);
-void VK_DestroyRenderPass();
-qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height);
+
+qboolean VK_CreateFramebuffer(uint32_t width, uint32_t height, qboolean clear);
+void Vk_ChangeRenderPass(uint32_t width, uint32_t height, qboolean clear);
 void VK_DestroyFramebuffer(void);
 
 qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean vertex, VkPipelineShaderStageCreateInfo *shader);

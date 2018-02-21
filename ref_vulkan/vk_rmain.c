@@ -919,8 +919,8 @@ static void R_InitContextObjects()
 
     vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, &vk_context.cmdbuffer);
 
-    VK_CreateRenderPass();
-    VK_CreateFramebuffer(vid.width, vid.height);
+    VK_CreateFramebuffer(vid.width, vid.height, vk_clear->value ? true : false);
+	vk_clear->modified = false;
     Vk_DSetSetupLayout();
 
     ////////////////////////
@@ -1108,7 +1108,6 @@ void R_Shutdown(void)
 {
     Vk_DSetDestroyLayout();
     VK_DestroyFramebuffer();
-    VK_DestroyRenderPass();
 
     if (vk_context.present != VK_NULL_HANDLE || 
         vk_context.render != VK_NULL_HANDLE)
@@ -1174,6 +1173,12 @@ void R_BeginFrame(float camera_separation)
 		vid_gamma->modified = false;
 
         // TODO:? 
+	}
+
+	if (vk_clear->modified)
+	{
+		Vk_ChangeRenderPass(vid.width, vid.height, vk_clear->value ? true : false);
+		vk_clear->modified = false;
 	}
 
 	VKimp_BeginFrame(camera_separation);
