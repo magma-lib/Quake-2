@@ -850,6 +850,7 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		extern XMMATRIX r_viewproj;
 		r_viewproj = oldviewproj;
+		//qglCullFace( GL_FRONT );
 	}
 
 	if ( currententity->flags & RF_TRANSLUCENT )
