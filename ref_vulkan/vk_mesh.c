@@ -565,6 +565,7 @@ void R_DrawAliasModel (entity_t *e)
 	float		an;
 	vec3_t		bbox[8];
 	image_t		*skin;
+	XMMATRIX	oldviewproj;
 
 	if ( !( e->flags & RF_WEAPONMODEL ) )
 	{
@@ -762,13 +763,10 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
 	{
-		//qglMatrixMode( GL_PROJECTION );
-		//qglPushMatrix();
-		//qglLoadIdentity();
-		//qglScalef( -1, 1, 1 );
-	    //MYgluPerspective( r_newrefdef.fov_y, ( float ) r_newrefdef.width / r_newrefdef.height,  4,  4096);
-		//qglMatrixMode( GL_MODELVIEW );
-
+		extern XMMATRIX r_viewproj;
+		XMMATRIX reflect = XMMatrixScaling(-1.f, 1.f, 1.f);
+		oldviewproj = r_viewproj;
+		r_viewproj = XMMatrixMultiply(&r_viewproj, &reflect);
 		//qglCullFace( GL_BACK );
 	}
 
@@ -850,10 +848,8 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
 	{
-		//qglMatrixMode( GL_PROJECTION );
-		//qglPopMatrix();
-		//qglMatrixMode( GL_MODELVIEW );
-		//qglCullFace( GL_FRONT );
+		extern XMMATRIX r_viewproj;
+		r_viewproj = oldviewproj;
 	}
 
 	if ( currententity->flags & RF_TRANSLUCENT )
