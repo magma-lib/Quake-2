@@ -65,4 +65,6 @@ void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader)
         vkDestroyShaderModule(vk_context.device, shader->module, NULL);
         shader->module = VK_NULL_HANDLE;
     }
+
+	memset(shader, 0, sizeof(VkPipelineShaderStageCreateInfo));
 }

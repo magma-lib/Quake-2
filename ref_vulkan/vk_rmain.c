@@ -856,25 +856,6 @@ qboolean R_SetMode(void)
 
 /*
 ===============
-R_LoadShaders
-===============
-*/
-static void R_LoadShaders()
-{
-    Vk_LoadShader("tnl_alias_v.o", "main", true, &vk_shaders.tnl_alias_v);
-    Vk_LoadShader("tnl_alias_f.o", "main", false, &vk_shaders.tnl_alias_f);
-    
-	Vk_LoadShader("tnl_brush_v.o", "main", true, &vk_shaders.tnl_brush_v);
-    Vk_LoadShader("tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
-    Vk_LoadShader("tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
-
-	Vk_LoadShader("shaders/draw2d_v.o", "main", true, &vk_shaders.draw2D_v);
-    Vk_LoadShader("shaders/draw2d_f.o", "main", false, &vk_shaders.draw2D_f);
-	Vk_LoadShader("shaders/fill2d_f.o", "main", false, &vk_shaders.fill2D_f);
-}
-
-/*
-===============
 R_InitContextObjects
 ===============
 */
@@ -887,20 +868,18 @@ static void R_InitContextObjects()
 	VkPushConstantRange pushconstant_range;
 	VkPipelineLayoutCreateInfo layout_info;
 
-    vkGetDeviceQueue(vk_context.device, 0, 0, &vk_context.queue);
-    vkGetDeviceQueue(vk_context.device, 2, 0, &vk_context.transfer_queue);
-
-    semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     semaphore_info.pNext = NULL;
     semaphore_info.flags = 0;
 
+	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_info.pNext = NULL;
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT; // create as signaled for first frame
+
+    vkGetDeviceQueue(vk_context.device, 0, 0, &vk_context.queue);
+    vkGetDeviceQueue(vk_context.device, 2, 0, &vk_context.transfer_queue);
     vkCreateSemaphore(vk_context.device, &semaphore_info, NULL, &vk_context.present);
     vkCreateSemaphore(vk_context.device, &semaphore_info, NULL, &vk_context.render);
-
-    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fence_info.pNext = NULL;
-    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT; // create with singled bit for first frame
-
     vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[0]);
     vkCreateFence(vk_context.device, &fence_info, NULL, &vk_context.fences[1]);
 
@@ -919,8 +898,6 @@ static void R_InitContextObjects()
 
     vkAllocateCommandBuffers(vk_context.device, &cmdbuf_alloc_info, &vk_context.cmdbuffer);
 
-    VK_CreateFramebuffer(vid.width, vid.height, vk_clear->value ? true : false);
-	vk_clear->modified = false;
     Vk_DSetSetupLayout();
 
 	pushconstant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -960,6 +937,66 @@ static void R_InitContextObjects()
 	vk_context.p_alias_trifan_cull_back = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, 
 		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+}
+
+/*
+===============
+R_FreeContextObjects
+===============
+*/
+static void R_FreeContextObjects()
+{
+	vkDestroyPipeline(vk_context.device, vk_context.p_world, NULL);
+	vkDestroyPipeline(vk_context.device, vk_context.p_brush, NULL);
+	vkDestroyPipeline(vk_context.device, vk_context.p_alias_tristrip, NULL);
+	vkDestroyPipeline(vk_context.device, vk_context.p_alias_trifan, NULL);
+	vkDestroyPipeline(vk_context.device, vk_context.p_alias_tristrip_cull_back, NULL);
+	vkDestroyPipeline(vk_context.device, vk_context.p_alias_trifan_cull_back, NULL);
+	vkDestroyPipelineLayout(vk_context.device, vk_context.pipeline_layout, NULL);
+
+	Vk_DSetDestroyLayout();
+
+	vkFreeCommandBuffers(vk_context.device, vk_context.cmdpool, 1, &vk_context.cmdbuffer);
+	vkDestroyCommandPool(vk_context.device, vk_context.cmdpool, NULL);
+
+	vkDestroySemaphore(vk_context.device, vk_context.present, NULL);
+    vkDestroySemaphore(vk_context.device, vk_context.render, NULL);
+	vkDestroyFence(vk_context.device, vk_context.fences[0], NULL);
+	vkDestroyFence(vk_context.device, vk_context.fences[1], NULL);
+}
+
+/*
+===============
+R_LoadShaders
+===============
+*/
+static void R_LoadShaders()
+{
+    Vk_LoadShader("shaders/tnl_alias_v.o", "main", true, &vk_shaders.tnl_alias_v);
+    Vk_LoadShader("shaders/tnl_alias_f.o", "main", false, &vk_shaders.tnl_alias_f);
+	Vk_LoadShader("shaders/tnl_brush_v.o", "main", true, &vk_shaders.tnl_brush_v);
+    Vk_LoadShader("shaders/tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
+    Vk_LoadShader("shaders/tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
+	Vk_LoadShader("shaders/draw2d_v.o", "main", true, &vk_shaders.draw2D_v);
+    Vk_LoadShader("shaders/draw2d_f.o", "main", false, &vk_shaders.draw2D_f);
+	Vk_LoadShader("shaders/fill2d_f.o", "main", false, &vk_shaders.fill2D_f);
+}
+
+/*
+===============
+R_FreeShaders
+===============
+*/
+static void R_FreeShaders()
+{
+    Vk_DestroyShader(&vk_shaders.tnl_alias_v);
+    Vk_DestroyShader(&vk_shaders.tnl_alias_f);   
+	Vk_DestroyShader(&vk_shaders.tnl_brush_v);
+    Vk_DestroyShader(&vk_shaders.tnl_world_v);
+    Vk_DestroyShader(&vk_shaders.tnl_world_f);
+	Vk_DestroyShader(&vk_shaders.draw2D_v);
+    Vk_DestroyShader(&vk_shaders.draw2D_f);
+	Vk_DestroyShader(&vk_shaders.fill2D_f);
 }
 
 /*
@@ -1104,10 +1141,14 @@ qboolean R_Init(void *hinstance, void *hWnd)
         return false;
     }
 
+	// create framebuffer
+	VK_CreateFramebuffer(vid.width, vid.height, vk_clear->value ? true : false);
+	vk_clear->modified = false;
+
     // initialize common Vulkan objects
     R_LoadShaders();
     R_InitContextObjects();
-
+	
     ri.Vid_MenuInit();
 
     Vk_InitImages();
@@ -1127,17 +1168,10 @@ void R_Shutdown(void)
 {
 	Draw_DestroyLocal();
 
-    Vk_DSetDestroyLayout();
-    VK_DestroyFramebuffer();
+	R_FreeShaders();
+	R_FreeContextObjects();
 
-    if (vk_context.present != VK_NULL_HANDLE || 
-        vk_context.render != VK_NULL_HANDLE)
-    {
-        vkDestroySemaphore(vk_context.device, vk_context.present, NULL);
-        vkDestroySemaphore(vk_context.device, vk_context.render, NULL);
-        vk_context.present = VK_NULL_HANDLE;
-        vk_context.render = VK_NULL_HANDLE;
-    }
+    VK_DestroyFramebuffer();
 
     if (vk_context.device != VK_NULL_HANDLE)
     {
