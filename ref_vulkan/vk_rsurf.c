@@ -723,7 +723,7 @@ void R_DrawInlineBModel (void)
 
 	offset = 0;
 	// brush pipeline uses vertex shader with per-object transforms
-	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_brush);
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_brush);
     vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
 	//
@@ -1045,7 +1045,7 @@ void R_DrawWorld (void)
 	if (res != VK_SUCCESS)
         return;
 
-	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_world);
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_world);
     vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
     R_RecursiveWorldNode(r_worldmodel->nodes);

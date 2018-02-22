@@ -311,6 +311,8 @@ void	Vk_FreeUnusedImages(void);
 void Vk_TextureAlphaMode(char *string);
 void Vk_TextureSolidMode(char *string);
 
+//====================================================================
+
 typedef struct
 {
 	VkImage			image;
@@ -353,10 +355,11 @@ typedef struct
 	VkDescriptorSet		dset;
 
 	VkPipelineLayout	pipeline_layout;
-	VkPipeline			pipeline_world;
-	VkPipeline			pipeline_brush;
-	VkPipeline			pipeline_tri_strip;
-	VkPipeline			pipeline_tri_fan;
+
+	VkPipeline			p_world;
+	VkPipeline			p_brush;
+	VkPipeline			p_alias_tristrip;
+	VkPipeline			p_alias_trifan;
 
 	VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;
@@ -414,6 +417,22 @@ VULKAN OBJECTS
 ====================================================================
 */
 
+typedef enum
+{
+	VF_BRUSH,
+	VF_ALIAS,
+	VF_SPRITE,
+	VF_DRAW,
+	VF_FILL,
+} vertex_format_t;
+
+typedef enum
+{
+	BLEND_NONE,
+	BLEND_NORMAL,
+	BLEND_ADD
+} blend_t;
+
 void VK_InitDebugCallback(void);
 void VK_DestroyDebugCallback(void);
 
@@ -425,10 +444,11 @@ qboolean Vk_LoadShader(const char *filename, const char *entrypoint, qboolean ve
 void Vk_DestroyShader(VkPipelineShaderStageCreateInfo *shader);
 qboolean Vk_DSetSetupLayout();
 void Vk_DSetDestroyLayout();
-VkPipeline Vk_CreateDefaultPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
-    VkPrimitiveTopology topology);
-VkPipeline Vk_CreateWorldPipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag,
-    VkPrimitiveTopology topology);
+
+VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag, vertex_format_t format, 
+	VkPrimitiveTopology topology, VkPolygonMode polygonmode, VkCullModeFlags cullmode, 
+	VkCompareOp depthfunc, blend_t blendmode);
+
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateUniformBuffer(VkDeviceSize size, vkbuffer_t *buffer);

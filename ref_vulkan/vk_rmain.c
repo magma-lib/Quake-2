@@ -601,14 +601,9 @@ void R_SetModelViewProjection()
 
 /*
 =============
-R_BindGraphicsPipeline
+R_Flash
 =============
 */
-void R_BindGraphicsPipeline(void)
-{
-    vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_tri_strip);
-}
-
 void R_Flash(void)
 {
     R_PolyBlend();
@@ -666,7 +661,6 @@ void R_RenderView(refdef_t *fd)
 
     R_SetFrustum();
     R_SetViewport();
-    R_BindGraphicsPipeline();
     R_SetModelViewProjection();
 
     //R_SetupGL();
@@ -886,6 +880,8 @@ static void R_InitContextObjects()
     VkFenceCreateInfo fence_info;
     VkCommandPoolCreateInfo cmdpool_info;
     VkCommandBufferAllocateInfo cmdbuf_alloc_info;
+	VkPushConstantRange pushconstant_range;
+	VkPipelineLayoutCreateInfo layout_info;
 
     vkGetDeviceQueue(vk_context.device, 0, 0, &vk_context.queue);
     vkGetDeviceQueue(vk_context.device, 2, 0, &vk_context.transfer_queue);
@@ -923,24 +919,35 @@ static void R_InitContextObjects()
 	vk_clear->modified = false;
     Vk_DSetSetupLayout();
 
-    ////////////////////////
-
-    VkPipelineLayoutCreateInfo layout_info;
+	pushconstant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	pushconstant_range.offset = 0;
+	pushconstant_range.size = sizeof(float) * 4; // color
 
     layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     layout_info.pNext = NULL;
     layout_info.flags = 0;
     layout_info.setLayoutCount = 1;
     layout_info.pSetLayouts = &vk_context.dset_layout;
-    layout_info.pushConstantRangeCount = 0;
-    layout_info.pPushConstantRanges = NULL;
+    layout_info.pushConstantRangeCount = 1;
+    layout_info.pPushConstantRanges = &pushconstant_range;
 
     vkCreatePipelineLayout(vk_context.device, &layout_info, NULL, &vk_context.pipeline_layout);
 
-    vk_context.pipeline_world = Vk_CreateWorldPipeline(vk_shaders.tnl_world_v, vk_shaders.tnl_world_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-	vk_context.pipeline_brush = Vk_CreateWorldPipeline(vk_shaders.tnl_brush_v, vk_shaders.tnl_world_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    vk_context.pipeline_tri_strip = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP);
-    vk_context.pipeline_tri_fan = Vk_CreateDefaultPipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN);
+	vk_context.p_world = Vk_CreatePipeline(vk_shaders.tnl_world_v, vk_shaders.tnl_world_f, VF_BRUSH, 
+		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
+		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+
+	vk_context.p_brush = Vk_CreatePipeline(vk_shaders.tnl_brush_v, vk_shaders.tnl_world_f, VF_BRUSH, 
+		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
+		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+
+	vk_context.p_alias_tristrip = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
+		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
+		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+
+	vk_context.p_alias_trifan = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
+		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
+		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 }
 
 /*
