@@ -433,6 +433,7 @@ typedef enum
 	VF_SPRITE,
 	VF_DRAW,
 	VF_FILL,
+	VF_DEBUG
 } vertex_format_t;
 
 typedef enum

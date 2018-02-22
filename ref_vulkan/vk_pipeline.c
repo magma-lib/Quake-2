@@ -155,6 +155,26 @@ static void Vk_SetFillVertexFormat(vkfmt_t *vf)
 
 /*
 =============
+Vk_SetDebugVertexFormat
+=============
+*/
+static void Vk_SetDebugVertexFormat(vkfmt_t *vf)
+{
+    vf->bindings[0].binding = 0;
+    vf->bindings[0].stride = sizeof(vec3_t);
+    vf->bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    // x, y, z
+    vf->attribs[0].location = 0;
+    vf->attribs[0].binding = 0;
+    vf->attribs[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    vf->attribs[0].offset = 0;
+
+	vf->vertexBindingDescriptionCount = 1;
+	vf->vertexAttributeDescriptionCount = 1;
+}
+
+/*
+=============
 Vk_CreatePipeline
 =============
 */
@@ -200,6 +220,9 @@ VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineSha
 		break;
 	case VF_FILL:
 		Vk_SetFillVertexFormat(&vf);
+		break;
+	case VF_DEBUG:
+		Vk_SetDebugVertexFormat(&vf);
 		break;
 	}
 
