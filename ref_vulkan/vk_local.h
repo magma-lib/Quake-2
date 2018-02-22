@@ -296,20 +296,20 @@ void VK_ResampleTexture(unsigned *in, int inwidth, int inheight, unsigned *out, 
 struct image_s *R_RegisterSkin(char *name);
 
 void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height);
-image_t *VK_LoadPic(char *name, byte *pic, int width, int height, imagetype_t type, int bits);
-image_t	*VK_FindImage(char *name, imagetype_t type);
-void	VK_TextureMode(char *string);
-void	VK_ImageList_f(void);
+image_t *Vk_LoadPic(char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+image_t	*Vk_FindImage(char *name, imagetype_t type);
+void	Vk_TextureMode(char *string);
+void	Vk_ImageList_f(void);
 
-void	VK_SetTexturePalette(unsigned palette[256]);
+void	Vk_SetTexturePalette(unsigned palette[256]);
 
-void	VK_InitImages(void);
-void	VK_ShutdownImages(void);
+void	Vk_InitImages(void);
+void	Vk_ShutdownImages(void);
 
-void	VK_FreeUnusedImages(void);
+void	Vk_FreeUnusedImages(void);
 
-void VK_TextureAlphaMode(char *string);
-void VK_TextureSolidMode(char *string);
+void Vk_TextureAlphaMode(char *string);
+void Vk_TextureSolidMode(char *string);
 
 typedef struct
 {

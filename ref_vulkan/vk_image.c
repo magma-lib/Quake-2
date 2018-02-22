@@ -31,8 +31,8 @@ cvar_t		*intensity;
 
 unsigned	d_8to24table[256];
 
-qboolean VK_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
-qboolean VK_Upload32 (unsigned *data, int width, int height,  qboolean mipmap);
+qboolean Vk_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
+qboolean Vk_Upload32 (unsigned *data, int width, int height,  qboolean mipmap);
 
 int		vk_alpha_format = 0;
 
@@ -71,10 +71,10 @@ vktmode_t vk_alpha_modes[] = {
 
 /*
 ===============
-VK_TextureMode
+Vk_TextureMode
 ===============
 */
-void VK_TextureMode( char *string )
+void Vk_TextureMode( char *string )
 {
 	int		i;
 	//image_t	*vkt;
@@ -99,10 +99,10 @@ void VK_TextureMode( char *string )
 
 /*
 ===============
-VK_TextureAlphaMode
+Vk_TextureAlphaMode
 ===============
 */
-void VK_TextureAlphaMode( char *string )
+void Vk_TextureAlphaMode( char *string )
 {
 	int		i;
 
@@ -123,10 +123,10 @@ void VK_TextureAlphaMode( char *string )
 
 /*
 ===============
-VK_ImageList_f
+Vk_ImageList_f
 ===============
 */
-void	VK_ImageList_f (void)
+void	Vk_ImageList_f (void)
 {
 	int		i;
 	image_t	*image;
@@ -238,7 +238,7 @@ void Scrap_Upload (void)
 {
 	scrap_uploads++;
 	//GL_Bind(TEXNUM_SCRAPS);
-	VK_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
+	Vk_Upload8 (scrap_texels[0], BLOCK_WIDTH, BLOCK_HEIGHT, false, false );
 	scrap_dirty = false;
 }
 
@@ -647,10 +647,10 @@ void R_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 
 /*
 ================
-VK_ResampleTexture
+Vk_ResampleTexture
 ================
 */
-void VK_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight)
+void Vk_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight)
 {
 	int		i, j;
 	unsigned	*inrow, *inrow2;
@@ -694,13 +694,13 @@ void VK_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 
 /*
 ================
-VK_LightScaleTexture
+Vk_LightScaleTexture
 
 Scale up the pixel values in a texture to increase the
 lighting range
 ================
 */
-void VK_LightScaleTexture (unsigned *in, int inwidth, int inheight, qboolean only_gamma )
+void Vk_LightScaleTexture (unsigned *in, int inwidth, int inheight, qboolean only_gamma )
 {
 	if ( only_gamma )
 	{
@@ -736,12 +736,12 @@ void VK_LightScaleTexture (unsigned *in, int inwidth, int inheight, qboolean onl
 
 /*
 ================
-VK_MipMap
+Vk_MipMap
 
 Operates in place, quartering the size of the texture
 ================
 */
-void VK_MipMap (byte *in, int width, int height)
+void Vk_MipMap (byte *in, int width, int height)
 {
 	int		i, j;
 	byte	*out;
@@ -763,10 +763,10 @@ void VK_MipMap (byte *in, int width, int height)
 
 /*
 ===============
-VK_BuildPalettedTexture
+Vk_BuildPalettedTexture
 ===============
 */
-void VK_BuildPalettedTexture( unsigned char *paletted_texture, unsigned char *scaled, int scaled_width, int scaled_height )
+void Vk_BuildPalettedTexture( unsigned char *paletted_texture, unsigned char *scaled, int scaled_width, int scaled_height )
 {
 	int i;
 
@@ -791,12 +791,12 @@ qboolean uploaded_paletted;
 
 /*
 ===============
-VK_Upload32
+Vk_Upload32
 
 Returns has_alpha
 ===============
 */
-qboolean VK_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
+qboolean Vk_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 {
 	//int			samples;
 	unsigned	scaled[256*256];
@@ -848,12 +848,12 @@ qboolean VK_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 
 /*
 ===============
-VK_Upload8
+Vk_Upload8
 
 Returns has_alpha
 ===============
 */
-qboolean VK_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky )
+qboolean Vk_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky )
 {
 	unsigned	trans[512*256];
 	int			i, s;
@@ -896,7 +896,7 @@ qboolean VK_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 			}
 		}
 
-		return VK_Upload32 (trans, width, height, mipmap);
+		return Vk_Upload32 (trans, width, height, mipmap);
 	}
 
     return true;
@@ -905,12 +905,12 @@ qboolean VK_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 
 /*
 ================
-GL_LoadPic
+Vk_LoadPic
 
 This is also used as an entry point for the generated r_notexture
 ================
 */
-image_t *VK_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits)
+image_t *Vk_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits)
 {
 	image_t		*image;
 	int			i;
@@ -974,9 +974,9 @@ nonscrap:
 		image->texnum = TEXNUM_IMAGES + (image - vktextures);
 		//VK_Bind(image->texnum);
 		if (bits == 8)
-			image->has_alpha = VK_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
+			image->has_alpha = Vk_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
 		else
-			image->has_alpha = VK_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
+			image->has_alpha = Vk_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
 		image->paletted = uploaded_paletted;
@@ -992,10 +992,10 @@ nonscrap:
 
 /*
 ================
-VK_LoadWal
+Vk_LoadWal
 ================
 */
-image_t *VK_LoadWal (char *name)
+image_t *Vk_LoadWal (char *name)
 {
 	miptex_t	*mt;
 	int			width, height, ofs;
@@ -1012,7 +1012,7 @@ image_t *VK_LoadWal (char *name)
 	height = LittleLong (mt->height);
 	ofs = LittleLong (mt->offsets[0]);
 
-	image = VK_LoadPic (name, (byte *)mt + ofs, width, height, it_wall, 8);
+	image = Vk_LoadPic (name, (byte *)mt + ofs, width, height, it_wall, 8);
 
 	ri.FS_FreeFile ((void *)mt);
 
@@ -1021,12 +1021,12 @@ image_t *VK_LoadWal (char *name)
 
 /*
 ===============
-VK_FindImage
+Vk_FindImage
 
 Finds or loads the given image
 ===============
 */
-image_t	*VK_FindImage (char *name, imagetype_t type)
+image_t	*Vk_FindImage (char *name, imagetype_t type)
 {
 	image_t	*image;
 	int		i, len;
@@ -1059,18 +1059,18 @@ image_t	*VK_FindImage (char *name, imagetype_t type)
 		LoadPCX (name, &pic, &palette, &width, &height);
 		if (!pic)
 			return NULL; // ri.Sys_Error (ERR_DROP, "GL_FindImage: can't load %s", name);
-		image = VK_LoadPic (name, pic, width, height, type, 8);
+		image = Vk_LoadPic (name, pic, width, height, type, 8);
 	}
 	else if (!strcmp(name+len-4, ".wal"))
 	{
-		image = VK_LoadWal (name);
+		image = Vk_LoadWal (name);
 	}
 	else if (!strcmp(name+len-4, ".tga"))
 	{
 		LoadTGA (name, &pic, &width, &height);
 		if (!pic)
 			return NULL; // ri.Sys_Error (ERR_DROP, "GL_FindImage: can't load %s", name);
-		image = VK_LoadPic (name, pic, width, height, type, 32);
+		image = Vk_LoadPic (name, pic, width, height, type, 32);
 	}
 	else
 		return NULL;	//	ri.Sys_Error (ERR_DROP, "GL_FindImage: bad extension on: %s", name);
@@ -1093,19 +1093,19 @@ R_RegisterSkin
 */
 struct image_s *R_RegisterSkin (char *name)
 {
-	return VK_FindImage (name, it_skin);
+	return Vk_FindImage (name, it_skin);
 }
 
 
 /*
 ================
-VK_FreeUnusedImages
+Vk_FreeUnusedImages
 
 Any image that was not touched on this registration sequence
 will be freed.
 ================
 */
-void VK_FreeUnusedImages (void)
+void Vk_FreeUnusedImages (void)
 {
 	int		i;
 	image_t	*image;
@@ -1169,10 +1169,10 @@ int Draw_GetPalette (void)
 
 /*
 ===============
-VK_InitImages
+Vk_InitImages
 ===============
 */
-void	VK_InitImages (void)
+void	Vk_InitImages (void)
 {
 	int		i, j;
 	float	g = vid_gamma->value;
@@ -1226,10 +1226,10 @@ void	VK_InitImages (void)
 
 /*
 ===============
-VK_ShutdownImages
+Vk_ShutdownImages
 ===============
 */
-void	VK_ShutdownImages (void)
+void	Vk_ShutdownImages (void)
 {
 	int		i;
 	image_t	*image;
