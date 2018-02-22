@@ -363,6 +363,8 @@ typedef struct
 	VkPipeline			p_brush;
 	VkPipeline			p_alias_tristrip;
 	VkPipeline			p_alias_trifan;
+	VkPipeline			p_alias_tristrip_cull_back;
+	VkPipeline			p_alias_trifan_cull_back;
 
 	VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;

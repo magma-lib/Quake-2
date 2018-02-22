@@ -44,6 +44,12 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 typedef float vec4_t[4];
 
+typedef struct
+{
+	qboolean	cull_back;
+	qboolean	blend;
+} alias_states_t;
+
 typedef struct 
 {
     vkbuffer_t  vertexattribs[ALIAS_NUM_ATTRIBS];
@@ -53,6 +59,7 @@ typedef struct
 } vkaliasvertexdata;
 
 static vkaliasvertexdata s_alias;
+static alias_states_t s_states;
 
 //static	vec4_t	s_lerped[MAX_VERTS];
 //static	vec3_t	lerped[MAX_VERTS];
@@ -121,6 +128,7 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
 	float	*texcoords;
 	uint16_t *indices;
 	uint32_t first;
+	VkPipeline pipe;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->frame * paliashdr->framesize);
@@ -207,12 +215,20 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
 			if (count < 0)
 			{
 				count = -count;
-				vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_alias_trifan);
+				if (s_states.cull_back)
+					pipe = vk_context.p_alias_trifan_cull_back;
+				else
+					pipe = vk_context.p_alias_trifan;
 			}
 			else
 			{
-				vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_alias_tristrip);
+				if (s_states.cull_back)
+					pipe = vk_context.p_alias_tristrip_cull_back;
+				else
+					pipe = vk_context.p_alias_tristrip;
 			}
+
+			vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipe);
 
 			// PMM - added double damage shell
 			if (currententity->flags & (RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM))
@@ -767,7 +783,7 @@ void R_DrawAliasModel (entity_t *e)
 		XMMATRIX reflect = XMMatrixScaling(-1.f, 1.f, 1.f);
 		oldviewproj = r_viewproj;
 		r_viewproj = XMMatrixMultiply(&r_viewproj, &reflect);
-		//qglCullFace( GL_BACK );
+		s_states.cull_back = true;
 	}
 
     //qglPushMatrix ();
@@ -800,7 +816,7 @@ void R_DrawAliasModel (entity_t *e)
 	//GL_TexEnv( GL_MODULATE );
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
-		//qglEnable (GL_BLEND);
+		s_states.blend = true;
 	}
 
 
@@ -850,12 +866,12 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		extern XMMATRIX r_viewproj;
 		r_viewproj = oldviewproj;
-		//qglCullFace( GL_FRONT );
+		s_states.cull_back = false;
 	}
 
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
-		//qglDisable (GL_BLEND);
+		s_states.blend = false;
 	}
 
 	if (currententity->flags & RF_DEPTHHACK)
