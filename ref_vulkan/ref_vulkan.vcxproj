@@ -306,23 +306,6 @@
     <ClCompile Include="vk_warp.c" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="shaders\fill.frag">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling fill.frag</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename).o</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling fill.frag</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling fill.frag</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename).o</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling fill.frag</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="shaders\tnl_world_v.vert">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
@@ -440,16 +423,33 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="shaders\fill2d_f.frag">
+    <CustomBuild Include="shaders\fill.frag">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling fill2d_f.frag</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling fill2d_f.frag</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling fill2d_f.frag</Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling fill2d_f.frag</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling fill.frag</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling fill.frag</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling fill.frag</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling fill.frag</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="shaders\mvp.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">$(VK_SDK_PATH)\Bin32\glslangValidator.exe -V %(RelativeDir)%(Filename)%(Extension) -o %(RelativeDir)%(Filename).o</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling mvp.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">Compiling mvp.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling mvp.vert</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">Compiling mvp.vert</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(RelativeDir)%(Filename).o</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug Alpha|Win32'">%(RelativeDir)%(Filename).o</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(RelativeDir)%(Filename).o</Outputs>

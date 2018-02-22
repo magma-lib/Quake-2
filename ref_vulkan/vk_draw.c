@@ -65,11 +65,11 @@ void Draw_InitLocal(void)
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, 
 		VK_COMPARE_OP_ALWAYS, BLEND_NONE);
 
-	vk_draw.p_fill = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill2D_f, VF_FILL,
+	vk_draw.p_fill = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill, VF_FILL,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE,
 		VK_COMPARE_OP_ALWAYS, BLEND_NONE);
 
-	vk_draw.p_blend = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill2D_f, VF_FILL,
+	vk_draw.p_blend = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill, VF_FILL,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE,
 		VK_COMPARE_OP_ALWAYS, BLEND_NORMAL);
 

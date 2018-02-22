@@ -56,9 +56,6 @@
     <CustomBuild Include="ref_vulkan.def">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="shaders\fill.frag">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="shaders\tnl_world_v.vert">
       <Filter>Resource Files</Filter>
     </CustomBuild>
@@ -80,7 +77,10 @@
     <CustomBuild Include="shaders\draw2d_f.frag">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="shaders\fill2d_f.frag">
+    <CustomBuild Include="shaders\fill.frag">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shaders\mvp.vert">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>

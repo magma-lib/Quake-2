@@ -979,7 +979,7 @@ static void R_LoadShaders()
     Vk_LoadShader("shaders/tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
 	Vk_LoadShader("shaders/draw2d_v.o", "main", true, &vk_shaders.draw2D_v);
     Vk_LoadShader("shaders/draw2d_f.o", "main", false, &vk_shaders.draw2D_f);
-	Vk_LoadShader("shaders/fill2d_f.o", "main", false, &vk_shaders.fill2D_f);
+	Vk_LoadShader("shaders/fill.o", "main", false, &vk_shaders.fill);
 }
 
 /*
@@ -996,7 +996,7 @@ static void R_FreeShaders()
     Vk_DestroyShader(&vk_shaders.tnl_world_f);
 	Vk_DestroyShader(&vk_shaders.draw2D_v);
     Vk_DestroyShader(&vk_shaders.draw2D_f);
-	Vk_DestroyShader(&vk_shaders.fill2D_f);
+	Vk_DestroyShader(&vk_shaders.fill);
 }
 
 /*

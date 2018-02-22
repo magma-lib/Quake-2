@@ -379,7 +379,7 @@ typedef struct
 
 	VkPipelineShaderStageCreateInfo draw2D_v;
 	VkPipelineShaderStageCreateInfo draw2D_f;
-	VkPipelineShaderStageCreateInfo fill2D_f;
+	VkPipelineShaderStageCreateInfo fill;
 } vkshaders_t;
 
 typedef struct
