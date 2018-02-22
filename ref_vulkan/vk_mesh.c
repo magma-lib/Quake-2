@@ -56,13 +56,10 @@ typedef struct
     vkbuffer_t  indexbuffer;
     uint32_t    vertexoffset;
     uint32_t    indexoffset;
-} vkaliasvertexdata;
+} vkalias_vertexdata_t;
 
-static vkaliasvertexdata s_alias;
+static vkalias_vertexdata_t s_alias;
 static alias_states_t s_states;
-
-//static	vec4_t	s_lerped[MAX_VERTS];
-//static	vec3_t	lerped[MAX_VERTS];
 
 vec3_t	shadevector;
 float	shadelight[3];
@@ -139,9 +136,6 @@ void Vk_DrawAliasFrameLerp(dmdl_t *paliashdr, float backlerp, model_t *mod)
 	ov = oldframe->verts;
 
 	order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
-
-//	glTranslatef (frame->translate[0], frame->translate[1], frame->translate[2]);
-//	glScalef (frame->scale[0], frame->scale[1], frame->scale[2]);
 
 	if (currententity->flags & RF_TRANSLUCENT)
 		alpha = currententity->alpha;
@@ -786,7 +780,6 @@ void R_DrawAliasModel (entity_t *e)
 		s_states.cull_back = true;
 	}
 
-    //qglPushMatrix ();
 	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
 	R_RotateForEntity (e);
 	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
@@ -811,14 +804,11 @@ void R_DrawAliasModel (entity_t *e)
 
 	// draw it
 
-	//qglShadeModel (GL_SMOOTH);
-
 	//GL_TexEnv( GL_MODULATE );
 	if ( currententity->flags & RF_TRANSLUCENT )
 	{
 		s_states.blend = true;
 	}
-
 
 	if ( (currententity->frame >= paliashdr->num_frames) 
 		|| (currententity->frame < 0) )
@@ -843,24 +833,6 @@ void R_DrawAliasModel (entity_t *e)
 	Vk_DrawAliasFrameLerp(paliashdr, currententity->backlerp, currentmodel);
 
 	//GL_TexEnv( GL_REPLACE );
-	//qglShadeModel (GL_FLAT);
-
-	//qglPopMatrix ();
-
-#if 0
-	qglDisable( GL_CULL_FACE );
-	qglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	qglDisable( GL_TEXTURE_2D );
-	qglBegin( GL_TRIANGLE_STRIP );
-	for ( i = 0; i < 8; i++ )
-	{
-		qglVertex3fv( bbox[i] );
-	}
-	qglEnd();
-	qglEnable( GL_TEXTURE_2D );
-	qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-	qglEnable( GL_CULL_FACE );
-#endif
 
 	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
 	{
@@ -883,5 +855,4 @@ void R_DrawAliasModel (entity_t *e)
 		// TODO:
 	}
 #endif
-	//qglColor4f (1,1,1,1);
 }
