@@ -266,6 +266,9 @@ void R_RenderDlights(void);
 void R_DrawAlphaSurfaces(void);
 void R_InitParticleTexture(void);
 void Draw_InitLocal(void);
+void Draw_DestroyLocal(void);
+void Draw_Begin(void);
+void Draw_End(void);
 void Vk_SubdivideSurface(msurface_t *fa);
 qboolean R_CullBox(vec3_t mins, vec3_t maxs);
 void R_RotateForEntity(entity_t *e);
@@ -371,6 +374,10 @@ typedef struct
 	VkPipelineShaderStageCreateInfo tnl_world_v;
 	VkPipelineShaderStageCreateInfo tnl_world_f;
 	VkPipelineShaderStageCreateInfo tnl_brush_v;
+
+	VkPipelineShaderStageCreateInfo draw2D_v;
+	VkPipelineShaderStageCreateInfo draw2D_f;
+	VkPipelineShaderStageCreateInfo fill2D_f;
 } vkshaders_t;
 
 typedef struct

@@ -867,6 +867,10 @@ static void R_LoadShaders()
 	Vk_LoadShader("tnl_brush_v.o", "main", true, &vk_shaders.tnl_brush_v);
     Vk_LoadShader("tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
     Vk_LoadShader("tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
+
+	Vk_LoadShader("shaders/draw2d_v.o", "main", true, &vk_shaders.draw2D_v);
+    Vk_LoadShader("shaders/draw2d_f.o", "main", false, &vk_shaders.draw2D_f);
+	Vk_LoadShader("shaders/fill2d_f.o", "main", false, &vk_shaders.fill2D_f);
 }
 
 /*
@@ -1113,6 +1117,8 @@ R_Shutdown
 */
 void R_Shutdown(void)
 {
+	Draw_DestroyLocal();
+
     Vk_DSetDestroyLayout();
     VK_DestroyFramebuffer();
 
@@ -1208,7 +1214,7 @@ void R_BeginFrame(float camera_separation)
 	/*
 	** define projection matrix
 	*/
-	r_ortho = XMMatrixOrthographicOffCenterRH(0.f, (float)vid.width, 0.f, (float)vid.height, -99999.f, 99999.f);
+	r_ortho = XMMatrixOrthographicOffCenterRH(0.f, (float)vid.width, (float)vid.height, 0.f, -99999.f, 99999.f);
 	if (vkMapMemory(vk_context.device, vk_transforms.perframe.memory, 
 		sizeof(XMMATRIX), 
 		sizeof(XMMATRIX), 
@@ -1240,6 +1246,20 @@ void R_BeginFrame(float camera_separation)
 	// clear screen if desired
 	//
     R_Clear();
+
+	Draw_Begin();
+}
+
+/*
+@@@@@@@@@@@@@@@@@@@@@
+R_EndFrame
+@@@@@@@@@@@@@@@@@@@@@
+*/
+void R_EndFrame(void)
+{
+	Draw_End();
+
+	VKimp_EndFrame();
 }
 
 /*
@@ -1317,7 +1337,7 @@ refexport_t GetRefAPI(refimport_t rimp)
 
     re.CinematicSetPalette = R_SetPalette;
     re.BeginFrame = R_BeginFrame;
-    re.EndFrame = VKimp_EndFrame;
+    re.EndFrame = R_EndFrame;
 
     re.AppActivate = VKimp_AppActivate;
 
