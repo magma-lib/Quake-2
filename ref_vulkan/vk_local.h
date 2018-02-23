@@ -128,6 +128,24 @@ typedef struct
 	float	r, g, b;
 } vkvert_t;
 
+typedef struct
+{
+	vec3_t	pos;
+	float	s1, t1;
+	float	s2, t2;
+} vkpolyvert_t;
+
+typedef struct
+{
+	vec3_t	pos;
+	byte	color[4];
+} vkparticle_t;
+
+typedef struct
+{
+	float	x, y;
+	float	s, t;
+} vkdrawvert_t;
 
 #define	MAX_LBM_HEIGHT		480
 
@@ -435,6 +453,7 @@ typedef enum
 	VF_BRUSH,
 	VF_ALIAS,
 	VF_SPRITE,
+	VF_PARTICLE,
 	VF_DRAW,
 	VF_FILL,
 	VF_DEBUG

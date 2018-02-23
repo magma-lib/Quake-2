@@ -44,13 +44,6 @@ int		c_visible_textures;
 
 typedef struct
 {
-    vec3_t  pos;
-    float   s1, t1;
-    float   s2, t2;
-} vkpolyvertex_t;
-
-typedef struct
-{
 	int internal_format;
 	int	current_lightmap_texture;
 
@@ -188,13 +181,13 @@ DrawVkPoly
 void DrawVkPoly (vkpoly_t *p, vkbuffer_t *vb)
 {
     int     i, n;
-    vkpolyvertex_t *v, *fv, *mv, *lv;
+    vkpolyvert_t *v, *fv, *mv, *lv;
     int     numverts;
 
-    fv = (vkpolyvertex_t *)p->verts; // first
+    fv = (vkpolyvert_t *)p->verts; // first
     mv = fv + 1; // middle
     lv = fv + 2; // last
-    v = (vkpolyvertex_t *)vb->memptr;
+    v = (vkpolyvert_t *)vb->memptr;
     
     for (i = 0, n = p->numverts - 2; i<n; ++i, ++lv)
     {
@@ -222,7 +215,7 @@ void DrawVkFlowingPoly (msurface_t *fa, vkbuffer_t *vb)
 	int		i, n;
 	vkpoly_t *p;
 	float	scroll;
-    vkpolyvertex_t *v, *fv, *mv, *lv;
+    vkpolyvert_t *v, *fv, *mv, *lv;
     int     numverts;
 
 	p = fa->polys;
@@ -231,10 +224,10 @@ void DrawVkFlowingPoly (msurface_t *fa, vkbuffer_t *vb)
 	if(scroll == 0.0)
 		scroll = -64.0;
 
-    fv = (vkpolyvertex_t *)p->verts; // first
+    fv = (vkpolyvert_t *)p->verts; // first
     mv = fv + 1; // middle
     lv = fv + 2; // last
-    v = (vkpolyvertex_t *)vb->memptr;
+    v = (vkpolyvert_t *)vb->memptr;
 
     for (i = 0, n = p->numverts - 2; i<n; ++i, ++lv)
     {
@@ -260,11 +253,11 @@ DrawVkWirePoly
 void DrawVkWirePoly (vkpoly_t *p, vkbuffer_t *vb)
 {
     int     i, n;
-    vkpolyvertex_t *fv, *mv, *lv;
+    vkpolyvert_t *fv, *mv, *lv;
 	float	*v;
     int     numverts;
 	
-    fv = (vkpolyvertex_t *)p->verts; // first
+    fv = (vkpolyvert_t *)p->verts; // first
     mv = fv + 1; // middle
     lv = fv + 2; // last
     v = (float *)vb->memptr;
@@ -759,8 +752,8 @@ void R_DrawInlineBModel (void)
 	}
 
     res = vkMapMemory(vk_context.device, vb->memory, 
-		vb->firstvertex * sizeof(vkpolyvertex_t),	// offset
-		numverts * sizeof(vkpolyvertex_t),			// chunk size
+		vb->firstvertex * sizeof(vkpolyvert_t),	// offset
+		numverts * sizeof(vkpolyvert_t),			// chunk size
 		0, &vb->memptr);
 	if (res != VK_SUCCESS)
 		return;

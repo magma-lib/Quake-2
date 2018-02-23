@@ -36,23 +36,23 @@ static void Vk_SetBrushVertexFormat(vkfmt_t *vf)
 {
 	// all attributes are come from single vertex buffer
     vf->bindings[0].binding = 0;
-    vf->bindings[0].stride = sizeof(float) * VERTEXSIZE;
+    vf->bindings[0].stride = sizeof(vkpolyvert_t);
     vf->bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     // position
     vf->attribs[0].location = 0;
     vf->attribs[0].binding = 0;
     vf->attribs[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    vf->attribs[0].offset = 0;
+    vf->attribs[0].offset = offsetof(vkpolyvert_t, pos);
     // uv0
     vf->attribs[1].location = 1;
     vf->attribs[1].binding = 0;
     vf->attribs[1].format = VK_FORMAT_R32G32_SFLOAT;
-    vf->attribs[1].offset = sizeof(vec3_t);
+    vf->attribs[1].offset = offsetof(vkpolyvert_t, s1);
     // uv1
     vf->attribs[2].location = 2;
     vf->attribs[2].binding = 0;
     vf->attribs[2].format = VK_FORMAT_R32G32_SFLOAT;
-    vf->attribs[2].offset = sizeof(vec3_t) + sizeof(float) * 2;
+    vf->attribs[2].offset = offsetof(vkpolyvert_t, s2);
 
 	vf->vertexBindingDescriptionCount = 1;
 	vf->vertexAttributeDescriptionCount = 3;
@@ -109,25 +109,50 @@ static void Vk_SetSpriteVertexFormat(vkfmt_t *vf)
 
 /*
 =============
+Vk_SetParticleVertexFormat
+=============
+*/
+static void Vk_SetParticleVertexFormat(vkfmt_t *vf)
+{
+	// See vkdrawvert_t
+    vf->bindings[0].binding = 0;
+    vf->bindings[0].stride = sizeof(vkparticle_t);
+    vf->bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    // x, y, z
+    vf->attribs[0].location = 0;
+    vf->attribs[0].binding = 0;
+    vf->attribs[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    vf->attribs[0].offset = offsetof(vkparticle_t, pos);
+    // color
+    vf->attribs[1].location = 1;
+    vf->attribs[1].binding = 0;
+    vf->attribs[1].format = VK_FORMAT_R8G8B8A8_UNORM;
+    vf->attribs[1].offset = offsetof(vkparticle_t, color);
+
+	vf->vertexBindingDescriptionCount = 1;
+	vf->vertexAttributeDescriptionCount = 2;
+}
+
+/*
+=============
 Vk_SetDrawVertexFormat
 =============
 */
 static void Vk_SetDrawVertexFormat(vkfmt_t *vf)
 {
-	// See vkdrawvert_t
     vf->bindings[0].binding = 0;
-    vf->bindings[0].stride = sizeof(float) * 4;
+    vf->bindings[0].stride = sizeof(vkdrawvert_t);
     vf->bindings[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     // x, y
     vf->attribs[0].location = 0;
     vf->attribs[0].binding = 0;
     vf->attribs[0].format = VK_FORMAT_R32G32_SFLOAT;
-    vf->attribs[0].offset = 0;
+    vf->attribs[0].offset = offsetof(vkdrawvert_t, x);
     // s, t
     vf->attribs[1].location = 1;
     vf->attribs[1].binding = 0;
     vf->attribs[1].format = VK_FORMAT_R32G32_SFLOAT;
-    vf->attribs[1].offset = sizeof(float) * 2;
+    vf->attribs[1].offset = offsetof(vkdrawvert_t, s);
 
 	vf->vertexBindingDescriptionCount = 1;
 	vf->vertexAttributeDescriptionCount = 2;
@@ -213,7 +238,9 @@ VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineSha
 		break;
 	case VF_SPRITE:
 		Vk_SetSpriteVertexFormat(&vf);
-		// TODO:
+		break;
+	case VF_PARTICLE:
+		Vk_SetParticleVertexFormat(&vf);
 		break;
 	case VF_DRAW:
 		Vk_SetDrawVertexFormat(&vf);		

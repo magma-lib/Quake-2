@@ -26,12 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef struct
 {
-	float x, y;
-	float s, t;
-} vkdrawvert_t;
-
-typedef struct
-{
 	VkPipeline	p_texture;
 	VkPipeline	p_fill;
 	VkPipeline	p_blend;
