@@ -21,3 +21,5 @@ ReleaseAXP/
 
 *.log
 *.tlog
+
+*.o
