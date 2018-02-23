@@ -1240,20 +1240,36 @@ R_Shutdown
 */
 void R_Shutdown(void)
 {
+	ri.Cmd_RemoveCommand ("modellist");
+	ri.Cmd_RemoveCommand ("screenshot");
+	ri.Cmd_RemoveCommand ("imagelist");
+	//ri.Cmd_RemoveCommand ("vk_strings");
+
+	Mod_FreeAll ();
+
+	//Vk_ShutdownImages();
+
 	Draw_DestroyLocal();
 
 	R_FreeShaders();
 	R_FreeContextObjects();
 
     VK_DestroyFramebuffer();
+	VK_DestroyDebugCallback();
 
+	/*
+	** shut down OS specific Vulkan stuff like swapchain, etc.
+	*/
+	VKimp_Shutdown();
+
+	/*
+	** Destroy device and Vulkan instance
+	*/
     if (vk_context.device != VK_NULL_HANDLE)
     {
         vkDestroyDevice(vk_context.device, NULL);
         vk_context.device = VK_NULL_HANDLE;
     }
-
-    VK_DestroyDebugCallback();
 
     if (vk_context.instance != VK_NULL_HANDLE)
     {
