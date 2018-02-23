@@ -35,6 +35,7 @@ msurface_t	*r_alpha_surfaces;
 #define	BLOCK_HEIGHT	128
 
 #define	MAX_LIGHTMAPS	128
+#define	MAX_DEBUG_VERTS	(1024 * 32)
 
 int		c_visible_lightmaps;
 int		c_visible_textures;
@@ -302,7 +303,7 @@ void R_DrawTriangleOutlines (void)
 	if (!vb->buffer)
 	{
 		// Lazy allocation
-		Vk_CreateVertexBuffer(1024 * 32 * sizeof(vec3_t), vb);
+		Vk_CreateVertexBuffer(MAX_DEBUG_VERTS * sizeof(vec3_t), vb);
 	}
 
 	if (vkMapMemory(vk_context.device, vb->memory, 
