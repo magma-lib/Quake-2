@@ -252,19 +252,70 @@ void DrawVkFlowingPoly (msurface_t *fa, vkbuffer_t *vb)
 //============
 
 /*
+================
+DrawVkWirePoly
+================
+*/
+void DrawVkWirePoly (vkpoly_t *p, vkbuffer_t *vb)
+{
+    int     i, n;
+    vkpolyvertex_t *fv, *mv, *lv;
+	float	*v;
+    int     numverts;
+	
+    fv = (vkpolyvertex_t *)p->verts; // first
+    mv = fv + 1; // middle
+    lv = fv + 2; // last
+    v = (float *)vb->memptr;
+ 
+    for (i = 0, n = p->numverts - 2; i<n; ++i, ++lv)
+    {
+		memcpy(v, fv->pos, sizeof(vec3_t)); v += 3;
+		memcpy(v, mv->pos, sizeof(vec3_t)); v += 3;
+		memcpy(v, lv->pos, sizeof(vec3_t)); v += 3;
+        mv = lv;
+    }
+
+    numverts = (p->numverts - 2) * 3;
+    vkCmdDraw(vk_context.cmdbuffer, numverts, 1, vb->firstvertex, 0);
+	vb->memptr = v;
+    vb->firstvertex += numverts;
+}
+
+/*
 ** R_DrawTriangleOutlines
 */
 void R_DrawTriangleOutlines (void)
 {
-	int			i, j;
+	int			i;
 	vkpoly_t	*p;
+	vkbuffer_t	*vb;
+	VkDeviceSize offset = 0;
+	float		color[4];
 
 	if (!vk_showtris->value)
 		return;
 
-	//qglDisable (GL_TEXTURE_2D);
-	//qglDisable (GL_DEPTH_TEST);
-	//qglColor4f (1,1,1,1);
+	color[0] = color[1] = color[2] = color[3] = 1.f;
+
+	vb = &vk_context.debugverts;
+	if (!vb->buffer)
+	{
+		// Lazy allocation
+		Vk_CreateVertexBuffer(1024 * 32 * sizeof(vec3_t), vb);
+	}
+
+	if (vkMapMemory(vk_context.device, vb->memory, 
+		vb->firstvertex * sizeof(vec3_t), // offset
+		VK_WHOLE_SIZE,	// rest of buffer
+		0, &vb->memptr) != VK_SUCCESS)
+		return;
+
+	vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_world_showtris);
+	vkCmdPushConstants(vk_context.cmdbuffer, vk_context.pipeline_layout, 
+		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+		0, sizeof(color), color);
+    vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vb->buffer, &offset);
 
 	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
 	{
@@ -275,21 +326,13 @@ void R_DrawTriangleOutlines (void)
 			p = surf->polys;
 			for ( ; p ; p=p->chain)
 			{
-				for (j=2 ; j<p->numverts ; j++ )
-				{
-					//qglBegin (GL_LINE_STRIP);
-					//qglVertex3fv (p->verts[0]);
-					//qglVertex3fv (p->verts[j-1]);
-					//qglVertex3fv (p->verts[j]);
-					//qglVertex3fv (p->verts[0]);
-					//qglEnd ();
-				}
+				DrawVkWirePoly(p, vb);
 			}
 		}
 	}
 
-	//qglEnable (GL_DEPTH_TEST);
-	//qglEnable (GL_TEXTURE_2D);
+	vkUnmapMemory(vk_context.device, vb->memory);
+	vb->memptr = NULL;
 }
 
 /*

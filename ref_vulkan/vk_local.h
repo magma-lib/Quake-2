@@ -353,6 +353,8 @@ typedef struct
 	VkFramebuffer		curr_framebuffer;
 	VkImage				*swap_images;
 
+	vkbuffer_t          debugverts;
+
 	VkDescriptorPool	dpool;
 	VkDescriptorSetLayout   dset_layout;
 	VkDescriptorSet		dset;
@@ -360,6 +362,7 @@ typedef struct
 	VkPipelineLayout	pipeline_layout;
 
 	VkPipeline			p_world;
+	VkPipeline			p_world_showtris;
 	VkPipeline			p_brush;
 	VkPipeline			p_alias_tristrip;
 	VkPipeline			p_alias_trifan;
@@ -371,6 +374,7 @@ typedef struct
 
 typedef struct
 {
+	VkPipelineShaderStageCreateInfo mvp;
 	VkPipelineShaderStageCreateInfo tnl_alias_v;
 	VkPipelineShaderStageCreateInfo tnl_alias_f;
 	VkPipelineShaderStageCreateInfo tnl_world_v;
