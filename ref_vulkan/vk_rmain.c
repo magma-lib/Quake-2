@@ -323,8 +323,9 @@ void R_DrawParticles(void)
 		vkparticle_t *pv;
 		uint32_t dynamicoffset = 0;
 		VkDeviceSize offset = 0;
-		float push_constants[3];
-
+		float fov_y;
+		float push_constants[4];
+	
 		if (!vk_context.particles.buffer)
 		{
 			// Lazy allocation
@@ -345,9 +346,11 @@ void R_DrawParticles(void)
 			vkUnmapMemory(vk_context.device, vk_context.particles.memory);
 		}
 
+		fov_y = XMConvertToRadians(r_newrefdef.fov_y);
 		push_constants[0] = (float)r_newrefdef.width;
 		push_constants[1] = (float)r_newrefdef.height;
-		push_constants[2] = vk_particle_size->value;
+		push_constants[2] = (float)r_newrefdef.height/(2.f * tanf(fov_y * .5f)); // scale with distance
+		push_constants[3] = vk_particle_size->value/40.f;
 
 		vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_particles);
 		vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout,
