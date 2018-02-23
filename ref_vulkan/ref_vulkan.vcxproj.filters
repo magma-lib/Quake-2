@@ -48,7 +48,7 @@
     <ClInclude Include="vk_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dxmath.h">
+    <ClInclude Include="xmmath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -139,10 +139,10 @@
     <ClCompile Include="vk_dset.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dxmmatrix.c">
+    <ClCompile Include="xmmatrix.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dxmvector.c">
+    <ClCompile Include="xmvector.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

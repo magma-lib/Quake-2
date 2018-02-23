@@ -11,7 +11,7 @@
 //
 // http://go.microsoft.com/fwlink/?LinkID=615560
 //-------------------------------------------------------------------------------------
-#include "dxmath.h"
+#include "xmmath.h"
 
 XMMATRIX XM_CALLCONV XMMatrixMultiply
 (
