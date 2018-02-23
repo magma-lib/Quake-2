@@ -372,4 +372,3 @@ XMMATRIX XM_CALLCONV XMMatrixOrthographicLH(float ViewWidth, float ViewHeight, f
 XMMATRIX XM_CALLCONV XMMatrixOrthographicRH(float ViewWidth, float ViewHeight, float NearZ, float FarZ);
 XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterLH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
 XMMATRIX XM_CALLCONV XMMatrixOrthographicOffCenterRH(float ViewLeft, float ViewRight, float ViewBottom, float ViewTop, float NearZ, float FarZ);
-
