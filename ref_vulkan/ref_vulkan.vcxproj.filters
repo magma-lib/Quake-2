@@ -83,6 +83,12 @@
     <CustomBuild Include="shaders\mvp.vert">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="shaders\particle_v.vert">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shaders\particle_f.frag">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\q_shared.c">

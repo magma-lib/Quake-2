@@ -313,6 +313,55 @@ R_DrawParticles
 */
 void R_DrawParticles(void)
 {
+	if (0 == r_newrefdef.num_particles)
+		return;
+
+	if (vk_context.features.largePoints)
+	{
+		int i;
+		const particle_t *p;
+		vkparticle_t *pv;
+		uint32_t dynamicoffset = 0;
+		VkDeviceSize offset = 0;
+		float push_constants[3];
+
+		if (!vk_context.particles.buffer)
+		{
+			// Lazy allocation
+			Vk_CreateVertexBuffer(MAX_PARTICLES * sizeof(vkparticle_t), &vk_context.particles);
+		}
+
+		if (vkMapMemory(vk_context.device, vk_context.particles.memory, 
+			0, // offset
+			r_newrefdef.num_particles * sizeof(vkparticle_t), // size of chunk
+			0, (void **)&pv) == VK_SUCCESS)
+		{
+			for ( i = 0, p = r_newrefdef.particles; i < r_newrefdef.num_particles; i++, p++, pv++ )
+			{
+				*(int *)pv->color = d_8to24table[p->color];
+				pv->color[3] = p->alpha*255;
+				VectorCopy(p->origin, pv->pos);
+			}
+			vkUnmapMemory(vk_context.device, vk_context.particles.memory);
+		}
+
+		push_constants[0] = (float)r_newrefdef.width;
+		push_constants[1] = (float)r_newrefdef.height;
+		push_constants[2] = vk_particle_size->value;
+
+		vkCmdBindPipeline(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.p_particles);
+		vkCmdBindDescriptorSets(vk_context.cmdbuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout,
+			0, 1, &vk_context.dset, 1, &dynamicoffset); // bind per-frame viewproj matrix
+		vkCmdPushConstants(vk_context.cmdbuffer, vk_context.pipeline_layout, 
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+			0, sizeof(push_constants), push_constants);
+		vkCmdBindVertexBuffers(vk_context.cmdbuffer, 0, 1, &vk_context.particles.buffer, &offset);
+		vkCmdDraw(vk_context.cmdbuffer, r_newrefdef.num_particles, 1, 0, 0);
+	}
+	else
+	{
+		//Vk_DrawParticles( r_newrefdef.num_particles, r_newrefdef.particles, d_8to24table );
+	}
 }
 
 /*
@@ -942,6 +991,10 @@ static void R_InitContextObjects()
 	vk_context.p_alias_trifan_cull_back = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, 
 		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+
+	vk_context.p_particles = Vk_CreatePipeline(vk_shaders.particle_v, vk_shaders.particle_f, VF_PARTICLE, 
+		VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, 
+		false, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NORMAL);
 }
 
 /*
@@ -985,6 +1038,8 @@ static void R_LoadShaders()
 	Vk_LoadShader("shaders/tnl_brush_v.o", "main", true, &vk_shaders.tnl_brush_v);
     Vk_LoadShader("shaders/tnl_world_v.o", "main", true, &vk_shaders.tnl_world_v);
     Vk_LoadShader("shaders/tnl_world_f.o", "main", false, &vk_shaders.tnl_world_f);
+	Vk_LoadShader("shaders/particle_v.o", "main", true, &vk_shaders.particle_v);
+    Vk_LoadShader("shaders/particle_f.o", "main", false, &vk_shaders.particle_f);
 	Vk_LoadShader("shaders/draw2d_v.o", "main", true, &vk_shaders.draw2D_v);
     Vk_LoadShader("shaders/draw2d_f.o", "main", false, &vk_shaders.draw2D_f);
 	Vk_LoadShader("shaders/fill.o", "main", false, &vk_shaders.fill);
@@ -1003,6 +1058,8 @@ static void R_FreeShaders()
 	Vk_DestroyShader(&vk_shaders.tnl_brush_v);
     Vk_DestroyShader(&vk_shaders.tnl_world_v);
     Vk_DestroyShader(&vk_shaders.tnl_world_f);
+	Vk_DestroyShader(&vk_shaders.particle_v);
+    Vk_DestroyShader(&vk_shaders.particle_f); 
 	Vk_DestroyShader(&vk_shaders.draw2D_v);
     Vk_DestroyShader(&vk_shaders.draw2D_f);
 	Vk_DestroyShader(&vk_shaders.fill);
@@ -1095,11 +1152,16 @@ qboolean R_Init(void *hinstance, void *hWnd)
     vk_context.phys_device = phys_devices[0]; // TODO: Cvar for this
     free(phys_devices);
 
+	vkGetPhysicalDeviceFeatures(vk_context.phys_device, &vk_context.features);
+
     // Enable widely used GPU features
     memset(&features, 0, sizeof(VkPhysicalDeviceFeatures));
+	if (vk_context.features.largePoints)
+		features.largePoints = VK_TRUE;
     features.fillModeNonSolid = VK_TRUE;
     features.samplerAnisotropy = VK_TRUE;
-    features.textureCompressionBC = VK_TRUE;
+	if (features.textureCompressionBC)
+		features.textureCompressionBC = VK_TRUE;
 
     vkGetPhysicalDeviceQueueFamilyProperties(vk_context.phys_device, &family_count, NULL);
     family_properties = calloc(family_count, sizeof(VkQueueFamilyProperties));

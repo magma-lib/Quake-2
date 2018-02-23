@@ -371,7 +371,8 @@ typedef struct
 	VkFramebuffer		curr_framebuffer;
 	VkImage				*swap_images;
 
-	vkbuffer_t          debugverts;
+	vkbuffer_t			particles;
+	vkbuffer_t			debugverts;
 
 	VkDescriptorPool	dpool;
 	VkDescriptorSetLayout   dset_layout;
@@ -386,7 +387,9 @@ typedef struct
 	VkPipeline			p_alias_trifan;
 	VkPipeline			p_alias_tristrip_cull_back;
 	VkPipeline			p_alias_trifan_cull_back;
+	VkPipeline			p_particles;
 
+	VkPhysicalDeviceFeatures features;
 	VkDebugReportCallbackEXT debug_report_callback;
 } vkcontext_t;
 
@@ -398,6 +401,8 @@ typedef struct
 	VkPipelineShaderStageCreateInfo tnl_world_v;
 	VkPipelineShaderStageCreateInfo tnl_world_f;
 	VkPipelineShaderStageCreateInfo tnl_brush_v;
+	VkPipelineShaderStageCreateInfo particle_v;
+	VkPipelineShaderStageCreateInfo particle_f;
 
 	VkPipelineShaderStageCreateInfo draw2D_v;
 	VkPipelineShaderStageCreateInfo draw2D_f;
