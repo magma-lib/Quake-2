@@ -7,5 +7,5 @@ layout(location = 0) out vec4 oColor;
 
 void main() 
 {
-    oColor = vec4(texcoord, 0., 1.);
+    oColor = vec4(color, 1.);
 }
