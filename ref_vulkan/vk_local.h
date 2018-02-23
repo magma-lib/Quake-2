@@ -480,7 +480,7 @@ void Vk_DSetDestroyLayout();
 
 VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag, vertex_format_t format, 
 	VkPrimitiveTopology topology, VkPolygonMode polygonmode, VkCullModeFlags cullmode, 
-	VkCompareOp depthfunc, blend_t blendmode);
+	qboolean depthwrite, VkCompareOp depthfunc, blend_t blendmode);
 
 qboolean Vk_CreateVertexBuffer(VkDeviceSize size, vkbuffer_t *buffer);
 qboolean Vk_CreateIndexBuffer(VkDeviceSize size, vkbuffer_t *buffer);

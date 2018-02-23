@@ -917,31 +917,31 @@ static void R_InitContextObjects()
 
 	vk_context.p_world = Vk_CreatePipeline(vk_shaders.tnl_world_v, vk_shaders.tnl_world_f, VF_BRUSH, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 
 	vk_context.p_world_showtris = Vk_CreatePipeline(vk_shaders.mvp, vk_shaders.fill, VF_DEBUG,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_LINE, VK_CULL_MODE_FRONT_BIT, 
-		VK_COMPARE_OP_ALWAYS, BLEND_NONE);
+		false, VK_COMPARE_OP_ALWAYS, BLEND_NONE);
 
 	vk_context.p_brush = Vk_CreatePipeline(vk_shaders.tnl_brush_v, vk_shaders.tnl_world_f, VF_BRUSH, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 
 	vk_context.p_alias_tristrip = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL,  BLEND_NONE);
 
 	vk_context.p_alias_trifan = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 
 	vk_context.p_alias_tristrip_cull_back = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP, VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 
 	vk_context.p_alias_trifan_cull_back = Vk_CreatePipeline(vk_shaders.tnl_alias_v, vk_shaders.tnl_alias_f, VF_ALIAS, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, 
-		VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
+		true, VK_COMPARE_OP_LESS_OR_EQUAL, BLEND_NONE);
 }
 
 /*

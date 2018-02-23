@@ -57,15 +57,15 @@ void Draw_InitLocal(void)
 {
 	vk_draw.p_texture = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.draw2D_f, VF_DRAW, 
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, 
-		VK_COMPARE_OP_ALWAYS, BLEND_NONE);
+		false, VK_COMPARE_OP_ALWAYS, BLEND_NONE);
 
 	vk_draw.p_fill = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill, VF_FILL,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE,
-		VK_COMPARE_OP_ALWAYS, BLEND_NONE);
+		false, VK_COMPARE_OP_ALWAYS, BLEND_NONE);
 
 	vk_draw.p_blend = Vk_CreatePipeline(vk_shaders.draw2D_v, vk_shaders.fill, VF_FILL,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE,
-		VK_COMPARE_OP_ALWAYS, BLEND_NORMAL);
+		false, VK_COMPARE_OP_ALWAYS, BLEND_NORMAL);
 
 	Vk_CreateVertexBuffer(MAX_DRAW_CHARS * sizeof(vkdrawvert_t) * 6, &vk_draw.chars);
 	Vk_CreateVertexBuffer(MAX_DRAW_PICS * sizeof(vkdrawvert_t) * 6, &vk_draw.pics);

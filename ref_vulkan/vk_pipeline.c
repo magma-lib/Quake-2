@@ -205,7 +205,7 @@ Vk_CreatePipeline
 */
 VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineShaderStageCreateInfo frag, vertex_format_t format, 
 	VkPrimitiveTopology topology, VkPolygonMode polygonmode, VkCullModeFlags cullmode, 
-	VkCompareOp depthfunc, blend_t blendmode)
+	qboolean depthwrite, VkCompareOp depthfunc, blend_t blendmode)
 {
 	VkPipeline pipeline = VK_NULL_HANDLE;
     VkGraphicsPipelineCreateInfo gp;
@@ -303,7 +303,7 @@ VkPipeline Vk_CreatePipeline(VkPipelineShaderStageCreateInfo vert, VkPipelineSha
     depth_stencil.pNext = NULL;
     depth_stencil.flags = 0;
     depth_stencil.depthTestEnable = (VK_COMPARE_OP_ALWAYS == depthfunc) ? VK_FALSE : VK_TRUE;
-    depth_stencil.depthWriteEnable = (VK_COMPARE_OP_ALWAYS == depthfunc) ? VK_FALSE : VK_TRUE;
+    depth_stencil.depthWriteEnable = depthwrite ? VK_TRUE : VK_FALSE;
     depth_stencil.depthCompareOp = depthfunc;
     depth_stencil.front.failOp = VK_STENCIL_OP_KEEP;
     depth_stencil.front.passOp = VK_STENCIL_OP_KEEP;
